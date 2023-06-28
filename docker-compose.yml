@@ -1,0 +1,45 @@
+version: "3.7"  # nurodome suderinamo docker-compose versiją
+services:
+  gameroom:
+    build: .
+    image: python:mortalgold
+    container_name: mortalgold.dev
+    tty: true
+    stdin_open: true
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - ./mortalgold:/app
+    depends_on:
+      - db
+    links:
+      - db:postgres
+    command: >
+      bash -c "python wait_for_postgres.py &&
+               python manage.py migrate &&
+               python manage.py collectstatic --noinput &&
+               gunicorn mortalgold.wsgi --bind 0.0.0.0:8000"
+  db:
+    image: postgres
+    container_name: mortalgold.db
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./dbdata:/var/lib/postgresql/dbdata
+    env_file:
+      - .env
+  nginx:
+    build: ./nginx/.
+    image: nginx:mortalgold
+    container_name: mortalgold.nginx
+    restart: always
+    ports:
+      - 80:80
+    links:
+      - mortalgold:mortalgold
+    volumes:
+      - ./mortalgold/media:/app/media
+      - ./mortalgold/static:/app/static
+    
