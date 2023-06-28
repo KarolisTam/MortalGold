@@ -2,7 +2,6 @@ import os
 import logging
 from time import time, sleep
 import psycopg2
-from . import local_settings
 
 # tikrinimo dažnumas, pagal nutylėjimą laukiame 30 sekundžių, ir nepavykus po sekundės laukiame iš naujo.
 check_timeout = os.getenv("POSTGRES_CHECK_TIMEOUT", 30)
@@ -12,7 +11,7 @@ check_interval = os.getenv("POSTGRES_CHECK_INTERVAL", 1)
 config = {
     "dbname": os.getenv("POSTGRES_DB", "mortalgold"),
     "user": os.getenv("POSTGRES_USER", "goldteam"),
-    "password": os.getenv("POSTGRES_PASSWORD", local_settings.DATABASE_PASSWORD),
+    "password": os.getenv("POSTGRES_PASSWORD", ""),
     "host": os.getenv("POSTGRES_HOST", "postgres"),
     "port": os.getenv("POSTGRES_PORT", "5432")
 }

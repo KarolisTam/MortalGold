@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'daphne',
+    'channels',
     'django.contrib.humanize',
     'django.contrib.admin',
     'django.contrib.auth',

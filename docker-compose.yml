@@ -1,6 +1,6 @@
 version: "3.7"  # nurodome suderinamo docker-compose versiją
 services:
-  gameroom:
+  mortalgold:
     build: .
     image: python:mortalgold
     container_name: mortalgold.dev
@@ -11,6 +11,8 @@ services:
       - 8000:8000
     volumes:
       - ./mortalgold:/app
+    env_file:
+      - .env
     depends_on:
       - db
     links:
