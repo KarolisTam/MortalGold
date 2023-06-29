@@ -26,19 +26,19 @@ SECRET_KEY = local_settings.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'gameapp',
     'userapp',
     'webapp',
+    'channels',
     'rest_framework',
     'rest_framework.authtoken',
-    'daphne',
-    'channels',
     'django.contrib.humanize',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -79,7 +79,17 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'mortalgold.wsgi.application'
+
 ASGI_APPLICATION = "mortalgold.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
+
 
 
 # Database

@@ -15,6 +15,7 @@ services:
       - .env
     depends_on:
       - db
+      - redis
     links:
       - db:postgres
     command: >
@@ -22,6 +23,29 @@ services:
                python manage.py migrate &&
                python manage.py collectstatic --noinput &&
                gunicorn mortalgold.wsgi --bind 0.0.0.0:8000"
+
+  daphne_service:
+    build: .
+    image: python:mortalgold
+    container_name: mortalgold.dap
+    tty: true
+    stdin_open: true
+    restart: always
+    ports:
+      - 8001:8001
+    volumes:
+      - ./mortalgold:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    links:
+      - db:postgres
+    command: >
+      bash -c "python wait_for_postgres.py &&
+               python manage.py migrate &&
+               daphne -b 0.0.0.0 -p 8001 mortalgold.asgi:application"
   db:
     image: postgres
     container_name: mortalgold.db
@@ -44,4 +68,10 @@ services:
     volumes:
       - ./mortalgold/media:/app/media
       - ./mortalgold/static:/app/static
-    
+  redis:
+    image: redis 
+    container_name: mortalgold.redis
+    restart: always
+    ports:
+      - 6379:6379
+  

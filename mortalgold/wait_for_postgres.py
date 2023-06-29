@@ -11,7 +11,7 @@ check_interval = os.getenv("POSTGRES_CHECK_INTERVAL", 1)
 config = {
     "dbname": os.getenv("POSTGRES_DB", "mortalgold"),
     "user": os.getenv("POSTGRES_USER", "goldteam"),
-    "password": os.getenv("POSTGRES_PASSWORD", ""),
+    "password": os.getenv("POSTGRES_PASSWORD", "1596321"),
     "host": os.getenv("POSTGRES_HOST", "postgres"),
     "port": os.getenv("POSTGRES_PORT", "5432")
 }
