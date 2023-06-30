@@ -38,7 +38,7 @@ putin_sheet = pygame.image.load("assets/images/putin/sprites/putin.png").convert
 zuckenberg_sheet = pygame.image.load("assets/images/zuckenberg/sprites/zuckenberg.png").convert_alpha()
 
 # define number of steps in each animation
-PUTIN_ANIMATION_STEPS = [7, 4, 1, 1, 1, 1, 1]
+PUTIN_ANIMATION_STEPS = [7, 4, 1, 8, 1, 1, 1]
 ZUCKENBERG_ANIMATION_STEPS = [7, 8, 1, 8, 8, 3, 7]
 
 # Function for drawing background
