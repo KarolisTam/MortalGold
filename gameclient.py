@@ -21,12 +21,12 @@ WHITE = (255, 255, 255)
 # define character variables
 PUTIN_SIZE = 200
 PUTIN_SCALE = 1
-PUTIN_OFFSET = [62, 26]
+PUTIN_OFFSET = [62, 20]
 PUTIN_DATA = [PUTIN_SIZE, PUTIN_SCALE, PUTIN_OFFSET]
 
 ZUCKENBERG_SIZE = 200
-ZUCKENBERG_SCALE = 3
-ZUCKENBERG_OFFSET = [63, 109]
+ZUCKENBERG_SCALE = 1
+ZUCKENBERG_OFFSET = [62, 20]
 ZUCKENBERG_DATA = [ZUCKENBERG_SIZE, ZUCKENBERG_SCALE, ZUCKENBERG_OFFSET]
 
 # Load background image
@@ -38,8 +38,8 @@ putin_sheet = pygame.image.load("assets/images/putin/sprites/putin.png").convert
 zuckenberg_sheet = pygame.image.load("assets/images/zuckenberg/sprites/zuckenberg.png").convert_alpha()
 
 # define number of steps in each animation
-PUTIN_ANIMATION_STEPS = [10, 8, 1, 7, 7, 3, 7]
-ZUCKENBERG_ANIMATION_STEPS = [8, 8, 1, 8, 8, 3, 7]
+PUTIN_ANIMATION_STEPS = [7, 8, 1, 7, 7, 3, 7]
+ZUCKENBERG_ANIMATION_STEPS = [7, 8, 1, 8, 8, 3, 7]
 
 # Function for drawing background
 def draw_bg():
@@ -71,6 +71,10 @@ while run:
     # show player stats
     draw_health_bar(character_1.health, 20, 20)
     draw_health_bar(character_2.health, 860, 20)
+
+    # update characters
+    character_1.update()
+    character_2.update()
 
     # draw character
     character_1.draw(screen)
