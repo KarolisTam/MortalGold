@@ -13,6 +13,7 @@ class Character():
         self.update_time = pygame.time.get_ticks()
         self.rect = pygame.Rect((x, y, 80, 180))
         self.vel_y = 0
+        self.running = False
         self.jump = False
         self.attacking = False
         self.attack_type = 0
@@ -34,6 +35,8 @@ class Character():
         GRAVITY = 2
         dx = 0
         dy = 0
+        self.running = False
+        self.attack_type = 0
 
         # get keypresses
         key = pygame.key.get_pressed()
@@ -43,8 +46,10 @@ class Character():
         # movement
             if key[pygame.K_a]:
                 dx = -SPEED
+                self.running = True
             if key[pygame.K_d]:
                 dx = SPEED
+                self.running = True
             # jump
             if key[pygame.K_w] and self.jump == False:
                 self.vel_y = -30
@@ -84,6 +89,14 @@ class Character():
         self.rect.y += dy
 
     def update(self):
+        # check what action the player is performing
+        if self.jump == True:
+            self.update_action(2) #jump
+        elif self.running == True:
+            self.update_action(1) #running
+        else:
+            self.update_action(0) #idle
+
         animation_cooldown = 50
         # update image
         self.image = self.animation_list[self.action][self.frame_index]
@@ -103,6 +116,14 @@ class Character():
             target.health -= 10
         
         pygame.draw.rect(surface, (0, 255, 0), attacking_rect)
+
+    def update_action(self, new_action):
+        # check if the new action is different to the previous one
+        if new_action != self.action:
+            self.action = new_action
+            # update animation settings
+            self.frame_index = 0
+            self.update_time = pygame.time.get_ticks()
 
     def draw(self, surface):
         img = pygame.transform.flip(self.image, self.flip, False)
