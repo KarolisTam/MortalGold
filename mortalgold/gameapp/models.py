@@ -8,20 +8,20 @@ User = get_user_model()
 class Match(models.Model):
     player1 = models.ForeignKey(
         User, 
-        verbose_name=_("Player 1"), 
-        related_name="matches_created", 
+        verbose_name=_("Player 1"),
+        related_name="matches_created",
         on_delete=models.CASCADE)
     player2 = models.ForeignKey(
         User, 
-        verbose_name=_("Player 2"), 
-        related_name="matches_joined", 
+        verbose_name=_("Player 2"),
+        related_name="matches_joined",
         on_delete=models.CASCADE, 
-        null=True, 
+        null=True,
         blank=True)
     created_at = models.DateTimeField(_("Created_at"), auto_now_add=True)
     winner = models.ForeignKey(
-        User, 
-        verbose_name=_("winner"), 
+        User,
+        verbose_name=_("winner"),
         related_name='matches_won',
         on_delete=models.CASCADE)
     loser = models.ForeignKey(
@@ -60,6 +60,9 @@ class GameAction(models.Model):
         (2, "jump"),
         (3, "punch"),
         (4, "kick"),
+        (5, "gethit"),
+        (6, "death"),
+        (7, "block"),
     )
     action = models.PositiveIntegerField(_("Action"), default=0, choices=ACTION_CHOICES) #choice
     player_hp_change = models.IntegerField(_("Player HP Change"), default=0)
@@ -70,6 +73,7 @@ class GameAction(models.Model):
     opponent_position_y = models.IntegerField(_("Opponent position y"), null=True, blank=True)
 
 
+
     
 
     class Meta:
@@ -77,7 +81,7 @@ class GameAction(models.Model):
         verbose_name_plural = _("games")
 
     def __str__(self):
-        return self.name
+        return self.match
 
     def get_absolute_url(self):
         return reverse("game_detail", kwargs={"pk": self.pk})
