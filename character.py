@@ -1,3 +1,4 @@
+#character.py
 import pygame
 
 class Character():
@@ -21,6 +22,7 @@ class Character():
         self.hit = False
         self.health = 100
         self.alive = True
+        self.blocking = False
 
     def load_images(self, sprite_sheet, animation_steps):
         # extract images from spritesheet
@@ -34,7 +36,7 @@ class Character():
         return animation_list
 
     def move(self, screen_width, screen_height, surface, target):
-        SPEED = 10
+        SPEED = 8
         GRAVITY = 2
         dx = 0
         dy = 0
@@ -46,13 +48,14 @@ class Character():
 
         # can only perform other action if not currently attacking
         if self.attacking == False:
-        # movement
+            # movement
             if key[pygame.K_a]:
                 dx = -SPEED
                 self.running = True
             if key[pygame.K_d]:
                 dx = SPEED
                 self.running = True
+
             # jump
             if key[pygame.K_w] and self.jump == False:
                 self.vel_y = -30
@@ -66,6 +69,12 @@ class Character():
                     self.attack_type = 1
                 if key[pygame.K_t]:
                     self.attack_type = 2
+
+            # Block
+            if key[pygame.K_q]:
+                self.blocking = True
+            else:
+                self.blocking = False
 
         # apply gravity
         self.vel_y += GRAVITY
@@ -103,6 +112,8 @@ class Character():
             self.update_action(6) # death
         elif self.hit == True:
             self.update_action(5) # getHit
+        elif self.blocking == True:
+            self.update_action(7) # block
         elif self.attacking == True:
             if self.attack_type == 1:
                 self.update_action(3) # attack
@@ -146,13 +157,20 @@ class Character():
     def attack(self, surface, target):
         if self.attack_cooldown == 0:
             self.attacking = True
-            attacking_rect = pygame.Rect(self.rect.centerx - (2 * self.rect.width * self.flip), self.rect.y, 2 * self.rect.width, self.rect.height)
+            attacking_rect = pygame.Rect(
+                self.rect.centerx - (2 * self.rect.width * self.flip), 
+                self.rect.y, 
+                2 * self.rect.width, 
+                self.rect.height)
+            
             if attacking_rect.colliderect(target.rect):
-                print("hit")
-                target.health -= 10
+                if target.blocking:
+                    target.health -= 1  # Reduce health by half if blocking
+                else:
+                    target.health -= 10  # Normal damage
                 target.hit = True
         
-            pygame.draw.rect(surface, (0, 255, 0), attacking_rect)
+            # pygame.draw.rect(surface, (0, 255, 0), attacking_rect)
 
     def update_action(self, new_action):
         # check if the new action is different to the previous one
@@ -164,5 +182,5 @@ class Character():
 
     def draw(self, surface):
         img = pygame.transform.flip(self.image, self.flip, False)
-        pygame.draw.rect(surface, (255, 0, 0), self.rect)
+        # pygame.draw.rect(surface, (255, 0, 0), self.rect)
         surface.blit(img, (self.rect.x - (self.offset[0] * self.image_scale), self.rect.y - (self.offset[1] * self.image_scale)))
