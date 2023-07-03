@@ -1,23 +1,15 @@
-    # consumers.py
+from channels.consumer import SyncConsumer
 
-from channels.generic.websocket import WebsocketConsumer
-import pygame
+class EchoConsumer(SyncConsumer):
 
-class GameConsumer(WebsocketConsumer):
     def connect(self):
-        # Initialize your Pygame game here
-        pygame.init()
-        # ...
-
         self.accept()
 
     def disconnect(self, close_code):
-        # Clean up your Pygame game here
-        pygame.quit()
+        pass
 
-    def receive(self, text_data):
-        # Handle incoming WebSocket messages here
-        # ...
-
-        # Send updates to the client
-        self.send(text_data)
+    def receive(self, data):
+        self.send(text_data=data)
+# async def main():
+#     async with websockets.serve(hello, "localhost", 8765):
+#         await asyncio.Future()  # run forever
