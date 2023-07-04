@@ -18,4 +18,4 @@ class EchoConsumer(SyncConsumer):
             "type": "websocket.send",
             "text": text_data
         })
-        print("Sent")
+        print(f"Sent {text_data}")

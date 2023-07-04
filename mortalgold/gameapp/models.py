@@ -72,10 +72,6 @@ class GameAction(models.Model):
     opponent_position_x = models.IntegerField(_("Opponent position x"), null=True, blank=True)
     opponent_position_y = models.IntegerField(_("Opponent position y"), null=True, blank=True)
 
-
-
-    
-
     class Meta:
         verbose_name = _("game")
         verbose_name_plural = _("games")

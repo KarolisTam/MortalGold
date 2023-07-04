@@ -2,6 +2,10 @@
 import pygame
 from character import Character
 from background import AnimatedBackground
+from login import LoginScreen
+
+login = LoginScreen()
+login.run()
 
 pygame.init()
 
@@ -15,6 +19,7 @@ pygame.display.set_caption("Mortal Gold")
 
 clock = pygame.time.Clock()
 FPS = 60
+
 
 #define colours
 RED = (255, 0, 0)
