@@ -1,15 +1,21 @@
-from channels.consumer import SyncConsumer
+
+
+from channels.generic.websocket import SyncConsumer
 
 class EchoConsumer(SyncConsumer):
+    def websocket_connect(self, event):
+        self.send({
+            "type": "websocket.accept"
+        })
+        print("Connected")
 
-    def connect(self):
-        self.accept()
-
-    def disconnect(self, close_code):
+    def websocket_disconnect(self, event):
         pass
 
-    def receive(self, data):
-        self.send(text_data=data)
-# async def main():
-#     async with websockets.serve(hello, "localhost", 8765):
-#         await asyncio.Future()  # run forever
+    def websocket_receive(self, event):
+        text_data = event["text"]
+        self.send({
+            "type": "websocket.send",
+            "text": text_data
+        })
+        print("Sent")
