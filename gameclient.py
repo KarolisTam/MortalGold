@@ -9,7 +9,6 @@ login.run()
 
 pygame.init()
 
-
 # Game window
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
@@ -19,7 +18,6 @@ pygame.display.set_caption("Mortal Gold")
 
 clock = pygame.time.Clock()
 FPS = 60
-
 
 #define colours
 RED = (255, 0, 0)
@@ -75,7 +73,7 @@ while run:
 
     # Character movement
     character_1.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, character_2)
-    character_2.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, character_1)
+    # character_2.move(SCREEN_WIDTH, SCREEN_HEIGHT, screen, character_1)
 
     # show player stats
     draw_health_bar(character_1.health, 20, 20)
@@ -93,8 +91,6 @@ while run:
         if event.type == pygame.QUIT:
             run = False
             
-
-
     # Update display
     pygame.display.update()
 
