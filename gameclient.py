@@ -1,10 +1,10 @@
-
 #gameclient.py
 import pygame
 from character import Character
 from background import AnimatedBackground
 
 pygame.init()
+
 
 # Game window
 SCREEN_WIDTH = 1280

@@ -1,8 +1,7 @@
-# routing.py
-from django.urls import path
+from django.urls import re_path
+
 from gameapp.consumers import EchoConsumer
 
 websocket_urlpatterns = [
-    path('ws/', EchoConsumer.as_asgi()),
+    re_path(r'ws/$', EchoConsumer.as_asgi()),
 ]
-
