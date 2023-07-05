@@ -1,33 +1,36 @@
 <!DOCTYPE html>
 {% load static %}
-<html lang="en">
+<html class="w3-animate-opacity" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mortal GOLD</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
-        <div class="w3-display-topleft w3-padding-large w3-xlarge">
-            Mortal GOLD
-        </div>
-        <div class="w3-display-middle">
-            <h1 class="w3-jumbo w3-animate-top">COMING SOON</h1>
-            <hr class="w3-border-grey" style="margin:auto;width:40%">
-            <p class="w3-large w3-center">12 days left</p>
-            <p class="w3-large w3-center"><a href="/">Redirect to main page</a></p>
-        </div>
-    </div>
+
+    <header class="header">
+        <h1 class="title"><a href="/">MORTAL GOLD</a></h1>
+        <p class="subtitle">Multiplayer fighting game. Created by Gold team</p>
+        
+        <nav class="navigation">
+          <a href="/">Home</a>
+          <a href="/htp">How to play</a>
+          <a href="/downloads">Downloads</a>
+          <a href="/tops">Top Players</a>
+        </nav>
+    </header>
     
     <main>
         {% block content %}
         {% endblock %}
     </main>
 
-    <footer>&copy; 2023 GOLDTEAM</footer>
+    <footer>
+        <p>&copy; 2023 GOLDTEAM</p>
+    </footer>
+
 </body>
 </html>
