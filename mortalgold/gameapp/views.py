@@ -37,3 +37,11 @@ class MatchDetailJoin(generics.RetrieveUpdateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializers.MatchSerializer(instance).data)
+
+
+class MatchMake(generics.ListAPIView):
+    serializer_class = serializers.MatchSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self, *args, **kwargs):
+        return models.Match.objects.filter(player2__isnull=True)
