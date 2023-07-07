@@ -9,9 +9,8 @@ class MatchAdmin(admin.ModelAdmin):
         'player2',
         'created_at',
         'winner',
-        'looser')
+        'loser')
     list_filter = ('id', 'created_at')
     
-
-class GameActionAdmin(admin.ModelAdmin):
-    pass
+admin.site.register(models.Match, MatchAdmin)
+admin.site.register(models.GameAction)

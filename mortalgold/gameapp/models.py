@@ -23,24 +23,27 @@ class Match(models.Model):
         User,
         verbose_name=_("winner"),
         related_name='matches_won',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        null=True, blank=True)
     loser = models.ForeignKey(
         User,
         verbose_name=_("loser"),
         related_name='matches_lost',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        null=True, blank=True)
     CHARACTERS = (
         (0, "Putin"),
         (1, "Musk"),
     )
-    character = models.PositiveSmallIntegerField(_("Character"), default=0, choices=CHARACTERS)
+    player1_character = models.PositiveSmallIntegerField(_("Player 1 Character"), null=True, blank=True, choices=CHARACTERS)
+    player2_character = models.PositiveSmallIntegerField(_("Player 2 Character"), null=True, blank=True, choices=CHARACTERS)
     
     class Meta:
         verbose_name = _("match")
         verbose_name_plural = _("matches")
 
     def __str__(self):
-        return self.winner
+        return f"{self.winner}"
 
     def get_absolute_url(self):
         return reverse("match_detail", kwargs={"pk": self.pk})
@@ -81,7 +84,7 @@ class GameAction(models.Model):
         verbose_name_plural = _("games")
 
     def __str__(self):
-        return self.match
+        return f'{self.math.id}'
 
     def get_absolute_url(self):
         return reverse("game_detail", kwargs={"pk": self.pk})
