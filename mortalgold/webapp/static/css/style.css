@@ -1,30 +1,37 @@
-body, h1 {
-    font-family: 'Blender Pro', sans-serif;
+@font-face {
+    font-family: 'MK4';
+    src: url('/fonts/MK4.TTF') format('truetype');
 }
+
 
 body {
     background-image: url('/static/images/bg.png');
     background-repeat: no-repeat;
-    background-position: center center;
     background-color: black;
     background-size: cover;
-    height: 100vh;
+    background-position: top center;
     margin: 0;
+}
+
+main {
+    padding-top: 2vh;
 }
 
 .header {
     text-align: center;
-    padding: 128px 16px;
+    padding: 64px 16pd;
 }
 
 .title, a {
-    font-size: 48px;
-    font-weight: bold;
+    font-family: 'MK4';
+    font-size: 6vh;
     color: white;
     text-decoration: none;
+    padding-top: 100px;
 }
 
 .subtitle {
+    font-family: 'MK4';
     font-size: 16px;
     color: white;
 }
@@ -32,23 +39,30 @@ body {
 .navigation {
     display: flex;
     justify-content: center;
-    margin-top: 32px;
 }
 
 .navigation a {
-    margin: 0 14px;
+    font-family: 'MK4';
+    margin: 0 2vw;
     color: white;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 1.4vw;
 }
 
 .container {
+    background-color: rgba(255, 255, 255, 0.13);
     color: whitesmoke;
+    max-width: 60vw;
+    margin: 0 auto;
+    padding: 1.5vw;
+    overflow: auto;
 }
 
 footer {
+    font-family: 'MK4';
     color: white;
     background-color: rgba(59, 59, 59, 0.068);
     text-align: center;
-    padding: 16px;
+    padding: 1.5vw;
+    font-size: 1.2vw;
 }
