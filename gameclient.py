@@ -3,9 +3,17 @@ import pygame
 from character import Character
 from background import AnimatedBackground
 from login import LoginScreen
+from character_selection import CharacterSelectionScreen
 
 login = LoginScreen()
 login.run()
+
+# Create animated background
+background = AnimatedBackground()
+
+# Create an instance of the character selection screen
+character_selection = CharacterSelectionScreen()
+character_selection.run()
 
 pygame.init()
 
@@ -47,7 +55,6 @@ musk_sheet = pygame.image.load("assets/images/musk/sprites/musk.png").convert_al
 PUTIN_ANIMATION_STEPS = [7, 4, 1, 5, 5, 4, 9, 1]
 MUSK_ANIMATION_STEPS = [7, 6, 1, 5, 5, 4, 10, 1]
 
-background = AnimatedBackground()
 
 #  function for drawing character health bars
 def draw_health_bar(health, x, y):
@@ -56,9 +63,14 @@ def draw_health_bar(health, x, y):
     pygame.draw.rect(screen, RED, (x, y, 400, 30))
     pygame.draw.rect(screen, YELLOW, (x, y, 400 * ratio, 30))
 
-# Create two instances of characters
-character_1 = Character(200, 450, False, PUTIN_DATA, putin_sheet, PUTIN_ANIMATION_STEPS)
-character_2 = Character(700, 450, True, MUSK_DATA, musk_sheet, MUSK_ANIMATION_STEPS)
+
+# Check the selected character and create instances accordingly
+if character_selection.selected_character == 0:
+    character_1 = Character(200, 450, False, PUTIN_DATA, putin_sheet, PUTIN_ANIMATION_STEPS)
+    character_2 = Character(700, 450, True, MUSK_DATA, musk_sheet, MUSK_ANIMATION_STEPS)
+else:
+    character_1 = Character(200, 450, False, MUSK_DATA, musk_sheet, MUSK_ANIMATION_STEPS)
+    character_2 = Character(700, 450, True, PUTIN_DATA, putin_sheet, PUTIN_ANIMATION_STEPS)
 
 run = True
 while run:

@@ -29,8 +29,12 @@ class Match(models.Model):
         verbose_name=_("loser"),
         related_name='matches_lost',
         on_delete=models.CASCADE)
+    CHARACTERS = (
+        (0, "Putin"),
+        (1, "Musk"),
+    )
+    character = models.PositiveSmallIntegerField(_("Character"), default=0, choices=CHARACTERS)
     
-
     class Meta:
         verbose_name = _("match")
         verbose_name_plural = _("matches")
