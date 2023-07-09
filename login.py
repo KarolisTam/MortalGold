@@ -1,3 +1,4 @@
+#login.py
 import pygame
 from pygame.locals import *
 
@@ -93,19 +94,3 @@ class LoginScreen:
                 return result
             self.display()
 
-# class CardGame:
-#     def __init__(self):
-#         self.login_screen = LoginScreen()
-
-#     def run(self):
-#         while True:
-#             if self.login_screen.run():
-#                 break
-
-#         # Get user login credentials from the login screen
-#         username = self.login_screen.username
-#         password = self.login_screen.password
-
-#         # ... (the rest of your code)
-
-# CardGame()
