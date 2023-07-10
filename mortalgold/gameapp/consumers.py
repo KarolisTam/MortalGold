@@ -1,4 +1,3 @@
-
 from channels.generic.websocket import SyncConsumer
 import json
 
@@ -44,4 +43,5 @@ class GameConsumer(SyncConsumer):
             "type": "websocket.send",
             "text": response_text
         })
+        print(f"Sent {game_data, response_text}")
         print(f"Sent {response_text}")
