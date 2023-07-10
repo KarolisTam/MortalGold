@@ -43,7 +43,7 @@ class Match(models.Model):
         verbose_name_plural = _("matches")
 
     def __str__(self):
-        return f"{self.winner}"
+        return f"{self.id}: {self.player1.username} vs {self.player2.username}"
 
     def get_absolute_url(self):
         return reverse("match_detail", kwargs={"pk": self.pk})
@@ -84,7 +84,7 @@ class GameAction(models.Model):
         verbose_name_plural = _("games")
 
     def __str__(self):
-        return f'{self.math.id}'
+        return f'{self.match.id}: {self.player.username}'
 
     def get_absolute_url(self):
         return reverse("game_detail", kwargs={"pk": self.pk})
