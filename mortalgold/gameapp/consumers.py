@@ -44,3 +44,4 @@ class GameConsumer(SyncConsumer):
             "text": response_text
         })
         print(f"Sent {game_data, response_text}")
+        print(f"Sent {response_text}")

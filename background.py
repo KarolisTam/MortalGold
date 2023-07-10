@@ -1,3 +1,4 @@
+#background.py
 import pygame
 
 class AnimatedBackground:
