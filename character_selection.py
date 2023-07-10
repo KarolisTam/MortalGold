@@ -1,10 +1,9 @@
+#character_selection.py
 import pygame
 import sys
 
-# Game window
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
-
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Mortal Gold")
@@ -18,11 +17,13 @@ class CharacterSelectionScreen:
         self.title_text = self.font.render("Select a Character", True, WHITE)
         self.character_texts = [
             self.font.render("Putin", True, WHITE),
-            self.font.render("Musk", True, WHITE)
+            self.font.render("Musk", True, WHITE),
+            self.font.render("Trump", True, WHITE)  # Add Trump character text
         ]
         self.character_rects = [
             self.character_texts[0].get_rect(center=(SCREEN_WIDTH // 4, SCREEN_HEIGHT // 2)),
-            self.character_texts[1].get_rect(center=(SCREEN_WIDTH // 4 * 3, SCREEN_HEIGHT // 2))
+            self.character_texts[1].get_rect(center=(SCREEN_WIDTH // 4 * 3, SCREEN_HEIGHT // 2)),
+            self.character_texts[2].get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))  # Add Trump character rect
         ]
         self.active = True
 

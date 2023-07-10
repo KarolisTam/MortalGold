@@ -1,7 +1,9 @@
+#views.py
 from . import models, serializers
 from rest_framework import generics, permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+
 
 class MatchCreateList(generics.ListCreateAPIView):
     serializer_class = serializers.MatchSerializer
@@ -12,6 +14,16 @@ class MatchCreateList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(player1=self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if queryset.exists():
+            match = queryset.first()
+            match.player2 = self.request.user
+            match.save()
+            return Response(serializers.MatchSerializer(match).data)
+        else:
+            raise ValidationError('No match is available.')
 
 
 class MatchDetailJoin(generics.RetrieveUpdateAPIView):
@@ -39,9 +51,3 @@ class MatchDetailJoin(generics.RetrieveUpdateAPIView):
         return Response(serializers.MatchSerializer(instance).data)
 
 
-class MatchMake(generics.ListAPIView):
-    serializer_class = serializers.MatchSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self, *args, **kwargs):
-        return models.Match.objects.filter(player2__isnull=True)
