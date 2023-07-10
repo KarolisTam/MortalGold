@@ -111,6 +111,8 @@ async def connect_to_server():
             # draw character
             character_1.draw(screen)
             character_2.draw(screen)
+            # Update display
+            pygame.display.update()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -118,13 +120,20 @@ async def connect_to_server():
 
             # Construct game data
             game_data = {
+                # Player 1
                 "player1_position_x": character_1.rect.x,
                 "player1_position_y": character_1.rect.y,
-                "player2_position_x": character_2.rect.x,
-                "player2_position_y": character_2.rect.y,
                 "player1_health": character_1.health,
-                "player2_health": character_2.health,
                 "player1_jump": character_1.jump,
+                "player1_action": character_1.action,
+                
+                # Player 2
+                # "player2_position_x": character_2.rect.x,
+                # "player2_position_y": character_2.rect.y,
+                # "player2_health": character_2.health,
+                # "player2_jump": character_2.jump,
+                # "player2_action": character_2.action,
+
                 # Include any other relevant game data
             }
 
@@ -141,8 +150,6 @@ async def connect_to_server():
 
             # Update game state based on server data
 
-            # Update display
-            pygame.display.update()
 
         # Exit Pygame
         pygame.quit()

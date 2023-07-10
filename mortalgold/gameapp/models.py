@@ -51,13 +51,13 @@ class Match(models.Model):
 
 class GameAction(models.Model):
     match = models.ForeignKey(
-        Match, 
-        verbose_name=_("match"), 
+        Match,
+        verbose_name=_("match"),
         related_name='game_actions',
         on_delete=models.CASCADE)
     created_at = models.DateTimeField(_("created"), auto_now_add=True)
     player = models.ForeignKey(
-        User, 
+        User,
         verbose_name=_("player"),
         related_name='game_actions',
         on_delete=models.CASCADE)

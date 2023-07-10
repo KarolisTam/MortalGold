@@ -1,6 +1,8 @@
 #login.py
 import pygame
 from pygame.locals import *
+import http.client
+import json
 
 class LoginScreen:
     def __init__(self):
@@ -16,6 +18,12 @@ class LoginScreen:
         self.password = ''
         self.username_active = True
         self.password_active = False
+        self.conn = http.client.HTTPConnection("127.0.0.1", 8001)
+        self.headers = {
+        "Accept": "*/*",
+        "User-Agent": "Mortal Gold",
+        "Content-Type": "application/json" 
+        }
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -33,13 +41,34 @@ class LoginScreen:
                     self.toggle_password_active()
                 elif event.key == K_RETURN:
                     if self.username and self.password:
-                        return True
+                        self.get_api_token()
+                        return print(f'labas')
                 else:
                     if self.is_username_active() and len(self.username) < 25:
                         self.username += event.unicode
                     elif self.is_password_active() and len(self.password) < 30:
                         self.password += event.unicode
         return None
+        
+    def get_api_token(self):
+        payload = json.dumps({
+        "username": f"{self.username}",
+        "password": f"{self.password}"
+        })
+        try:
+            self.conn.request("POST", "/game/api-token-auth/", payload, self.headers)
+            response = self.conn.getresponse()
+        except Exception as e:
+            print(e)
+            error = self.font.render('Username or Password is incorrect', True, self.WHITE)
+            self.screen.blit(error, (800, 360))
+        else:
+            token = json.loads(response.read())
+            print(token['token'])
+            # self.token = token['token']
+        # self.conn.request("POST", "/game/api-token-auth/", payload, self.headers)
+        # response = self.conn.getresponse()
+        # result = response.read()
 
     def display(self):
         background = pygame.image.load('assets/images/background/bg.png')  
@@ -93,4 +122,6 @@ class LoginScreen:
             if result is not None:
                 return result
             self.display()
+            
+
 
