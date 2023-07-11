@@ -8,28 +8,28 @@ User = get_user_model()
 class Match(models.Model):
     player1 = models.ForeignKey(
         User, 
-        verbose_name=_("Player 1"),
-        related_name="matches_created",
+        verbose_name=_("Player 1"), 
+        related_name="matches_created", 
         on_delete=models.CASCADE)
     player2 = models.ForeignKey(
         User, 
-        verbose_name=_("Player 2"),
-        related_name="matches_joined",
+        verbose_name=_("Player 2"), 
+        related_name="matches_joined", 
         on_delete=models.CASCADE, 
-        null=True,
+        null=True, 
         blank=True)
     created_at = models.DateTimeField(_("Created_at"), auto_now_add=True)
     winner = models.ForeignKey(
-        User,
-        verbose_name=_("winner"),
-        related_name='matches_won',
-        on_delete=models.CASCADE,
+        User, 
+        verbose_name=_("winner"), 
+        related_name='matches_won', 
+        on_delete=models.CASCADE, 
         null=True, blank=True)
     loser = models.ForeignKey(
-        User,
-        verbose_name=_("loser"),
-        related_name='matches_lost',
-        on_delete=models.CASCADE,
+        User, 
+        verbose_name=_("loser"), 
+        related_name='matches_lost', 
+        on_delete=models.CASCADE, 
         null=True, blank=True)
     CHARACTERS = (
         (0, "Putin"),

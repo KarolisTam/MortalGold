@@ -20,10 +20,11 @@ class LoginScreen:
         self.password_active = False
         self.conn = http.client.HTTPConnection("127.0.0.1", 8001)
         self.headers = {
-        "Accept": "*/*",
-        "User-Agent": "Mortal Gold",
-        "Content-Type": "application/json" 
+            "Accept": "*/*",
+            "User-Agent": "Mortal Gold",
+            "Content-Type": "application/json"
         }
+        self.error_message = None
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -42,36 +43,50 @@ class LoginScreen:
                 elif event.key == K_RETURN:
                     if self.username and self.password:
                         self.get_api_token()
-                        return print(f'labas')
+                        return True
                 else:
                     if self.is_username_active() and len(self.username) < 25:
                         self.username += event.unicode
                     elif self.is_password_active() and len(self.password) < 30:
                         self.password += event.unicode
+            elif event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:  # 1 represents the left mouse button
+                    mouse_pos = pygame.mouse.get_pos()
+                    if self.is_username_active():
+                        username_rect = pygame.Rect(200, 200, 400, 50)
+                        if username_rect.collidepoint(mouse_pos):
+                            self.toggle_username_active()
+                            self.toggle_password_active()
+                    else:
+                        login_button_rect = pygame.Rect(200, 400, 200, 50)
+                        cancel_button_rect = pygame.Rect(450, 400, 200, 50)
+                        if login_button_rect.collidepoint(mouse_pos):
+                            if self.username and self.password:
+                                self.get_api_token()
+                                return True
+                        elif cancel_button_rect.collidepoint(mouse_pos):
+                            self.username = ''
+                            self.password = ''
+
         return None
-        
+
     def get_api_token(self):
         payload = json.dumps({
-        "username": f"{self.username}",
-        "password": f"{self.password}"
+            "username": f"{self.username}",
+            "password": f"{self.password}"
         })
         try:
             self.conn.request("POST", "/game/api-token-auth/", payload, self.headers)
             response = self.conn.getresponse()
         except Exception as e:
             print(e)
-            error = self.font.render('Username or Password is incorrect', True, self.WHITE)
-            self.screen.blit(error, (800, 360))
+            self.error_message = 'Failed to get token. Please try again.'
         else:
             token = json.loads(response.read())
             print(token['token'])
-            # self.token = token['token']
-        # self.conn.request("POST", "/game/api-token-auth/", payload, self.headers)
-        # response = self.conn.getresponse()
-        # result = response.read()
 
     def display(self):
-        background = pygame.image.load('assets/images/background/bg.png')  
+        background = pygame.image.load('assets/images/background/bg.png')
         background = pygame.transform.scale(background, (self.screen_width, self.screen_height))
         self.screen.blit(background, (0, 0))
         title_text = self.font.render('Login', True, self.WHITE)
@@ -101,8 +116,21 @@ class LoginScreen:
 
         self.screen.blit(username_input, (username_input_x, username_input_y))
         self.screen.blit(password_input, (password_input_x, password_input_y))
-        pygame.display.flip()
 
+        login_button_rect = pygame.Rect(200, 400, 200, 50)
+        cancel_button_rect = pygame.Rect(450, 400, 200, 50)
+        pygame.draw.rect(self.screen, self.WHITE, login_button_rect, 2)
+        pygame.draw.rect(self.screen, self.WHITE, cancel_button_rect, 2)
+        login_button_text = self.font.render('Prisijungti', True, self.WHITE)
+        cancel_button_text = self.font.render('Atšaukti', True, self.WHITE)
+        self.screen.blit(login_button_text, (225, 410))
+        self.screen.blit(cancel_button_text, (475, 410))
+
+        if self.error_message:
+            error = self.font.render(self.error_message, True, self.WHITE)
+            self.screen.blit(error, (800, 360))
+
+        pygame.display.flip()
 
     def is_username_active(self):
         return self.username_active
@@ -122,6 +150,7 @@ class LoginScreen:
             if result is not None:
                 return result
             self.display()
-            
 
 
+login_screen = LoginScreen()
+login_screen.run()

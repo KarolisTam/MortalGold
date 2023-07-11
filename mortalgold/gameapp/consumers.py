@@ -1,6 +1,5 @@
 from channels.generic.websocket import SyncConsumer
 import json
-from . import models
 
 class GameConsumer(SyncConsumer):
     def websocket_connect(self, event):
@@ -25,7 +24,6 @@ class GameConsumer(SyncConsumer):
         player2_position_x = game_data.get("player2_position_x")
         player2_position_y = game_data.get("player2_position_y")
         
-        models.GameAction
         # Example: Update player health
         player1_health = game_data.get("player1_health")
         player2_health = game_data.get("player2_health")
@@ -46,4 +44,3 @@ class GameConsumer(SyncConsumer):
             "text": response_text
         })
         print(f"Sent {game_data, response_text}")
-        print(f"Sent {response_text}")

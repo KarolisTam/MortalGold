@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Sign up for {{ block.super }}{% endblock title %}
+{% block content %}
+<form action="{{ request.path }}" method="post">
+    {% csrf_token %}
+    <p>
+        <input type="text" name="first_name" value="{{ request.POST.first_name }}" placeholder="Enter your first name" style="width: 250px;">
+    </p>      
+    <p>
+        <input type="text" name="last_name" value="{{ request.POST.last_name }}" placeholder="Enter your last name" style="width: 250px;">
+    </p>
+    <p>
+        <input type="text" name="username" required value="{{ request.POST.username }}" placeholder="Username, must be unique" style="width: 250px;">
+    </p>
+    <p>
+        <input type="text" name="email" required value="{{ request.POST.email }}" placeholder="Enter your E-mail" style="width: 250px;">
+    </p>
+    <p>
+        <input type="password" name="password" required placeholder="Enter your password" style="width: 250px;">
+    </p>
+    <p>
+        <input type="password" name="password_confirm" required placeholder="Confirm your password" style="width: 250px;">
+    </p><br>
+    <p><button type="submit">Confirm Sign Up</button></p>
+    <p>If you have already an account, you can <a href="{% url 'login' %}" style="color: red;">login</a> instead.</p>
+</form>
+{% endblock content %}
