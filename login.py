@@ -44,6 +44,7 @@ class LoginScreen:
                 elif event.key == K_RETURN:
                     if self.username and self.password:
                         self.get_api_token()
+                        self.join_create_match()
                         return True
                 else:
                     if self.is_username_active() and len(self.username) < 25:
@@ -59,6 +60,7 @@ class LoginScreen:
                         if login_button_rect.collidepoint(mouse_pos):
                             if self.username and self.password:
                                 self.get_api_token()
+                                self.join_create_match()
                                 return True
                         elif cancel_button_rect.collidepoint(mouse_pos):
                             self.username = ''
@@ -74,14 +76,32 @@ class LoginScreen:
         try:
             self.conn.request("POST", "/game/api-token-auth/", payload, self.headers)
             response = self.conn.getresponse()
-            token = json.loads(response.read())
-            print(token['token'])
+            self.token = json.loads(response.read())
+            print(self.token['token'])
         except Exception as e:
             print(e)
             self.error_message = 'Failed to get token. Please try again.'
             self.username = ''  # Išvalyti vartotojo vardą ir slaptažodį
             self.password = ''
             return
+
+    def join_create_match(self):
+        self.header = {
+        "Accept": "*/*",
+        "User-Agent": "Thunder Client (https://www.thunderclient.com)",
+        "Authorization": "Token " + self.token['token']
+        }
+        payload = ""
+        try:
+            self.conn.request("GET", "/game/match/", payload, self.header)
+            response = self.conn.getresponse()
+            match = json.loads(response.read())
+            print(match)
+        except Exception as e:
+            print(e)
+            self.error_message = 'Failed to connect. Please try again.'
+            return
+
 
     def display(self):
         background = pygame.image.load('assets/images/background/bg.png')
