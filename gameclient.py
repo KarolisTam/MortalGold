@@ -1,3 +1,5 @@
+# gameclient.py
+
 import pygame
 from character import Character
 from background import AnimatedBackground
@@ -123,13 +125,13 @@ class GameClient:
                         "player1_position_y": character_1.rect.y,
                         "player1_health": character_1.health,
                         "player1_jump": character_1.jump,
-                        "player1_action": character_1.action,
+                        # "player1_action": character_1.action,
 
-                        # # Player 2
-                        # "player2_position_x": character_2.rect.x,
-                        # "player2_position_y": character_2.rect.y,
-                        # "player2_health": character_2.health,
-                        # "player2_jump": character_2.jump,
+                        # Player 2
+                        "player2_position_x": character_2.rect.x,
+                        "player2_position_y": character_2.rect.y,
+                        "player2_health": character_2.health,
+                        "player2_jump": character_2.jump,
                         # "player2_action": character_2.action,
 
                         # Include any other relevant game data
