@@ -22,6 +22,6 @@
         <input type="password" name="password_confirm" required placeholder="Confirm your password" style="width: 250px;">
     </p><br>
     <p><button type="submit">Confirm Sign Up</button></p>
-    <p>If you have already an account, you can <a href="{% url 'login' %}" style="color: red;">login</a> instead.</p>
+    {% comment %} <p>If you have already an account, you can <a href="{% url 'login' %}" style="color: red;">login</a> instead.</p> {% endcomment %}
 </form>
 {% endblock content %}

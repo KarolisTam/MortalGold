@@ -13,7 +13,7 @@ WHITE = (255, 255, 255)
 class CharacterSelectionScreen:
     def __init__(self):
         self.selected_character = None
-        self.font = pygame.font.SysFont(None, 50)
+        self.font = pygame.font.Font(None, 32)
         self.title_text = self.font.render("Select a Character", True, WHITE)
         self.character_texts = [
             self.font.render("Putin", True, WHITE),

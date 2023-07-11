@@ -4,6 +4,7 @@ from pygame.locals import *
 import http.client
 import json
 
+
 class LoginScreen:
     def __init__(self):
         pygame.init()
@@ -53,11 +54,6 @@ class LoginScreen:
                 if event.button == 1:  # 1 represents the left mouse button
                     mouse_pos = pygame.mouse.get_pos()
                     if self.is_username_active():
-                        username_rect = pygame.Rect(200, 200, 400, 50)
-                        if username_rect.collidepoint(mouse_pos):
-                            self.toggle_username_active()
-                            self.toggle_password_active()
-                    else:
                         login_button_rect = pygame.Rect(200, 400, 200, 50)
                         cancel_button_rect = pygame.Rect(450, 400, 200, 50)
                         if login_button_rect.collidepoint(mouse_pos):
@@ -78,12 +74,14 @@ class LoginScreen:
         try:
             self.conn.request("POST", "/game/api-token-auth/", payload, self.headers)
             response = self.conn.getresponse()
+            token = json.loads(response.read())
+            print(token['token'])
         except Exception as e:
             print(e)
             self.error_message = 'Failed to get token. Please try again.'
-        else:
-            token = json.loads(response.read())
-            print(token['token'])
+            self.username = ''  # Išvalyti vartotojo vardą ir slaptažodį
+            self.password = ''
+            return
 
     def display(self):
         background = pygame.image.load('assets/images/background/bg.png')
@@ -150,7 +148,3 @@ class LoginScreen:
             if result is not None:
                 return result
             self.display()
-
-
-login_screen = LoginScreen()
-login_screen.run()
