@@ -44,8 +44,8 @@ class LoginScreen:
                 elif event.key == K_RETURN:
                     if self.username and self.password:
                         self.get_api_token()
-                        self.join_create_match()
-                        return True
+                        self.match_id = self.join_create_match()
+                        return self.match_id
                 else:
                     if self.is_username_active() and len(self.username) < 25:
                         self.username += event.unicode
@@ -60,8 +60,8 @@ class LoginScreen:
                         if login_button_rect.collidepoint(mouse_pos):
                             if self.username and self.password:
                                 self.get_api_token()
-                                self.join_create_match()
-                                return True
+                                self.match_id = self.join_create_match()
+                                return self.match_id
                         elif cancel_button_rect.collidepoint(mouse_pos):
                             self.username = ''
                             self.password = ''
@@ -81,14 +81,14 @@ class LoginScreen:
         except Exception as e:
             print(e)
             self.error_message = 'Failed to get token. Please try again.'
-            self.username = ''  # Išvalyti vartotojo vardą ir slaptažodį
+            self.username = ''  
             self.password = ''
             return
 
     def join_create_match(self):
         self.header = {
         "Accept": "*/*",
-        "User-Agent": "Thunder Client (https://www.thunderclient.com)",
+        "User-Agent": "Mortal Gold",
         "Authorization": "Token " + self.token['token']
         }
         payload = ""
@@ -97,6 +97,7 @@ class LoginScreen:
             response = self.conn.getresponse()
             match = json.loads(response.read())
             print(match)
+            return match["id"]
         except Exception as e:
             print(e)
             self.error_message = 'Failed to connect. Please try again.'

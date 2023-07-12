@@ -1,5 +1,4 @@
 # gameclient.py
-
 import pygame
 from character import Character
 from background import AnimatedBackground
@@ -60,8 +59,9 @@ class GameClient:
 
     def run(self):
         login = LoginScreen()
-        result = login.run()
-        if not result:
+        self.match_id = login.run()
+        print(self.match_id)
+        if not self.match_id:
             return
 
         # Create animated background
@@ -83,7 +83,7 @@ class GameClient:
             character_2 = Character(700, 450, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
 
         async def connect_to_server():
-            uri = "ws://localhost:8001/ws/"
+            uri = f"ws://localhost:8001/ws/game/{self.match_id}/"
             async with websockets.connect(uri) as websocket:
                 run = True
                 while run:

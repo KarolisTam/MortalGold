@@ -3,6 +3,7 @@ from . import models, serializers
 from rest_framework import generics, permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from django.shortcuts import render
 
 
 class MatchCreateList(generics.ListCreateAPIView):
@@ -28,3 +29,13 @@ class MatchCreateList(generics.ListCreateAPIView):
             self.perform_create(serializer)
             return Response(serializer.data)
 
+
+
+def index(request):
+    return render(request, 'index.html', {})
+
+
+def room(request, room_name):
+    return render(request, 'chatroom.html', {
+        'room_name': room_name
+    })

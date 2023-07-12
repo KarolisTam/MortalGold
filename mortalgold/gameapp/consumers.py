@@ -1,59 +1,40 @@
-
-
-#consumers.py
-from channels.generic.websocket import SyncConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 
-class GameConsumer(SyncConsumer):
-    def websocket_connect(self, event):
-        self.send({
-            "type": "websocket.accept"
-        })
-        print("Connected")
+class GameConsumer(AsyncWebsocketConsumer):
+    
+    async def connect(self):
+        self.match_id = self.scope["url_route"]["kwargs"]["match_id"]
+        self.match_group_name = f"game_{self.match_id}"
 
-    def websocket_disconnect(self, event):
-        pass
+        # Join room group
+        await self.channel_layer.group_add(self.match_group_name, self.channel_name)
 
-    def websocket_receive(self, event):
-        text_data = event["text"]
+        await self.accept()
+        print("Connected!")
+
+    async def disconnect(self, close_code):
+        # Leave room group
+        await self.channel_layer.group_discard(self.match_group_name, self.channel_name)
+
+    async def receive(self, text_data):
+        # Process received data
         game_data = json.loads(text_data)
 
-        # Process the received game data
-        # Update game state based on the received data
+        # Perform actions with the game data
+        # ...
 
-        # Example: Update player positions
-        player1_position_x = game_data.get("player1_position_x")
-        player1_position_y = game_data.get("player1_position_y")
-        player2_position_x = game_data.get("player2_position_x")
-        player2_position_y = game_data.get("player2_position_y")
-
-        # Example: Update player health
-        player1_health = game_data.get("player1_health")
-        player2_health = game_data.get("player2_health")
-
-        # Example: Update player actions
-        player1_jump = game_data.get("player1_jump")
-        player2_jump = game_data.get("player2_jump")
-
-        # Update game state and perform other game logic here
-
-        # Prepare the server response
+        # Send response back to the client
         response_data = {
-            "status": "success",
-            "message": "Game state updated successfully",
-            # Include updated data for player 2
-            "player2_position_x": player2_position_x,
-            "player2_position_y": player2_position_y,
-            "player2_health": player2_health,
-            "player2_jump": player2_jump,
-            # Include any other relevant data to send back to the client
+            # Include any relevant response data
         }
-        response_text = json.dumps(response_data)
+        response_json = json.dumps(response_data)
+        await self.send(text_data=response_json)
 
-        # Send the response back to the client
-        self.send({
-            "type": "websocket.send",
-            "text": response_text
-        })
-        print(f"Sent {game_data, response_text}")
+    async def game_event(self, event):
+        # Handle game events sent from the server
+        # ...
 
+    # Additional methods for handling game logic
+    # ...
+        pass
