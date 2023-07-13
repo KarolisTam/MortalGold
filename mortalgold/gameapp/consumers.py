@@ -1,4 +1,3 @@
-# consumers.py
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 
@@ -18,7 +17,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.match_group_name,
             {
-                "type": "game_event",
+                "type": "player_event",
                 "event": "player_connected",
                 "player_id": self.channel_name
             }
@@ -32,7 +31,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.match_group_name,
             {
-                "type": "game_event",
+                "type": "player_event",
                 "event": "player_disconnected",
                 "player_id": self.channel_name
             }
@@ -42,55 +41,57 @@ class GameConsumer(AsyncWebsocketConsumer):
         # Process received data
         game_data = json.loads(text_data)
 
-        # Perform actions with the game data
+        # Send the received game data to the group
+        await self.channel_layer.group_send(
+            self.match_group_name,
+            {
+                "type": "game_event",
+                "game_data": game_data
+            }
+        )
+        print("received data.", game_data)
 
-        current_player = game_data.get("current_player")
-        # Example: Update player health
-        player_health = game_data.get("player_health")
-        opponent_health = game_data.get("opponent_health")
 
-        # Send response back to the client
-        response_data = {
-            "player_health": player_health,
-            "opponent_health": opponent_health,
-            "current_player": current_player,
-        }
-        response_json = json.dumps(response_data)
-        await self.send(text_data=response_json)
-        print(current_player, player_health)
-        
-        
+    async def player_event(self, event):
+        # Handle player events (e.g., player connected, player disconnected)
+        event_type = event["event"]
+        player_id = event["player_id"]
+
+        # Custom logic based on event type
+        if event_type == "player_connected":
+            print(f"Player {player_id} connected.")
+        elif event_type == "player_disconnected":
+            print(f"Player {player_id} disconnected.")
+
+
+
 
     async def game_event(self, event):
-        # Handle game events sent from the server
-        event_type = event.get("event")
+        # Update the game state based on the received game data
+        game_data = event["game_data"]
+        self.player_id = game_data.get("player_id")
 
-        if event_type == "player_connected":
-            # Retrieve the player ID from the event
-            player_id = event.get("player_id")
-            player_health = event.get("player_health")
+        self.player_health = game_data.get("player_health")
+        self.player_position_x = game_data.get("player_position_x")
+        self.player_position_y = game_data.get("player_position_y")
 
-            # Broadcast the player connection to other players
-            if player_id != self.channel_name:
-                response_data = {
-                    "event": "player_connected",
-                    "player_id": player_id,
-                }
-                response_json = json.dumps(response_data)
-                # print(player_health)
-                await self.send(text_data=response_json)
-                print(event)
+        self.opponent_health = game_data.get("opponent_health")
+        self.opponent_position_x = game_data.get("opponent_position_x")
+        self.opponent_position_y = game_data.get("opponent_position_y")
 
+        print("sending data", self.player_id)
 
-        elif event_type == "player_disconnected":
-            # Retrieve the player ID from the event
-            player_id = event.get("player_id")
+        # Send the updated game data to the client
+        await self.send(text_data=json.dumps({
+            "player_id": self.player_id,
 
-            # Broadcast the player disconnection to other players
-            if player_id != self.channel_name:
-                response_data = {
-                    "event": "player_disconnected",
-                    "player_id": player_id
-                }
-                response_json = json.dumps(response_data)
-                await self.send(text_data=response_json)
+            "player_health": self.player_health,
+            "player_position_x": self.player_position_x,
+            "player_position_y": self.player_position_y,
+
+            "opponent_health": self.opponent_health,
+            "opponent_position_x": self.opponent_position_x,
+            "opponent_position_y": self.opponent_position_y
+            
+        }))
+
