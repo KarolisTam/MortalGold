@@ -27,6 +27,7 @@ class LoginScreen:
         }
         self.error_message = None
 
+
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -78,6 +79,8 @@ class LoginScreen:
             response = self.conn.getresponse()
             self.token = json.loads(response.read())
             print(self.token['token'])
+            print(self.username)
+            return self.username
         except Exception as e:
             print(e)
             self.error_message = 'Failed to get token. Please try again.'
