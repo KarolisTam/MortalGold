@@ -45,8 +45,12 @@ class LoginScreen:
                 elif event.key == K_RETURN:
                     if self.username and self.password:
                         self.get_api_token()
-                        self.match_id = self.join_create_match()
-                        return self.match_id
+                        self.match = self.join_create_match()
+                        if self.username == self.match["player1"]:
+                            self.match["current player"] = 1
+                        else:
+                            self.match["current player"] = 2
+                        return self.match
                 else:
                     if self.is_username_active() and len(self.username) < 25:
                         self.username += event.unicode
@@ -61,13 +65,18 @@ class LoginScreen:
                         if login_button_rect.collidepoint(mouse_pos):
                             if self.username and self.password:
                                 self.get_api_token()
-                                self.match_id = self.join_create_match()
-                                return self.match_id
+                                self.match = self.join_create_match()
+                                if self.username == self.match["player1"]:
+                                    self.match["current player"] = 1
+                                else:
+                                    self.match["current player"] = 2
+                                return self.match
                         elif cancel_button_rect.collidepoint(mouse_pos):
                             self.username = ''
                             self.password = ''
 
         return None
+
 
     def get_api_token(self):
         payload = json.dumps({
@@ -100,7 +109,7 @@ class LoginScreen:
             response = self.conn.getresponse()
             match = json.loads(response.read())
             print(match)
-            return match["id"]
+            return match
         except Exception as e:
             print(e)
             self.error_message = 'Failed to connect. Please try again.'
