@@ -104,7 +104,7 @@ class Character():
         # update player possition
         self.rect.x += dx
         self.rect.y += dy
-
+    
     def update(self):
         # check what action the player is performing
         if self.health <= 0:
@@ -153,7 +153,7 @@ class Character():
                     #if the player was in the middle of an attack then attack is stopped
                     self.attacking = False
                     self.attack_cooldown = 20
-
+        return self.health
 
     def attack(self, surface, target):
         if self.attack_cooldown == 0:
@@ -185,6 +185,3 @@ class Character():
         img = pygame.transform.flip(self.image, self.flip, False)
         # pygame.draw.rect(surface, (255, 0, 0), self.rect)
         surface.blit(img, (self.rect.x - (self.offset[0] * self.image_scale), self.rect.y - (self.offset[1] * self.image_scale)))
-
-        
-        

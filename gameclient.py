@@ -1,4 +1,3 @@
-
 #gameclient.py
 import pygame
 import sys
@@ -86,16 +85,21 @@ class GameClient:
         # # Create an instance of the character selection screen
         # character_selection = CharacterSelectionScreen()
         # character_selection.run()
+
         opponent = None
         
         # Check the selected character and create instances accordingly
         if self.match["current player"] == 1:
+            self.player_id = self.match["player1_id"]
             player = Character(1, 200, 450, False, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
             opponent = Character(2, 700, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+            print(self.player_id)
         else:
+            self.player_id = self.match["player2_id"]
             player = Character(1, 700, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
             opponent = Character(2, 200, 450, False, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
         print(self.match["current player"])
+
 
         async def connect_to_server(self):
             uri = f"ws://localhost:8001/ws/game/{self.match_id}/"
@@ -132,9 +136,16 @@ class GameClient:
                     # Construct game data
                     game_data = {
                         # Player 1
+                        # "current_player": self.match["current player"],
+                        "player_id": self.player_id,
+
                         "player_health": player.health,
+                        "player_position_x": player.rect.x,
+                        "player_position_y": player.rect.y,
+
                         "opponent_health": opponent.health,
-                        "current_player": self.match["current player"],
+                        "opponent_position_x": opponent.rect.x,
+                        "opponent_position_y": opponent.rect.y
                     }
 
                     # Convert game data to JSON format
@@ -147,9 +158,15 @@ class GameClient:
                     server_data_json = await websocket.recv()
                     server_data = json.loads(server_data_json)
 
-                    # Update the characters' positions and health based on the received data
+                    # Update the characters' health based on the received data
                     player.health = server_data.get("player_health", player.health)
+                    player.rect.x = server_data.get("player_position_x", player.health)
+                    player.rect.y = server_data.get("player_position_y", player.health)
+
                     opponent.health = server_data.get("opponent_health", opponent.health)
+                    opponent.rect.x = server_data.get("opponent_position_x", opponent.health)
+                    opponent.rect.y = server_data.get("opponent_position_y", opponent.health)
+
 
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -169,7 +186,3 @@ if __name__ == "__main__":
     # Run the game client
     client = GameClient()
     client.run()
-
-
-
-
