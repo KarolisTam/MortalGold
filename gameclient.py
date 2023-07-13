@@ -63,6 +63,9 @@ class GameClient:
         self.TRUMP_ANIMATION_STEPS = [10, 5, 1, 5, 1, 1, 1, 1]
 
     def draw_health_bar(self, health, x, y):
+        if health is None:
+            return
+
         ratio = health / 100
         pygame.draw.rect(self.screen, self.WHITE, (x - 2, y - 2, 404, 34))
         pygame.draw.rect(self.screen, self.RED, (x, y, 400, 30))
@@ -70,8 +73,10 @@ class GameClient:
 
     def run(self):
         login = LoginScreen()
-        self.match_id = login.run()
+        self.match = login.run()
+        self.match_id = self.match["id"]
         print(self.match_id)
+        print(self.match)
         if not self.match_id:
             return
 
@@ -81,13 +86,16 @@ class GameClient:
         # # Create an instance of the character selection screen
         # character_selection = CharacterSelectionScreen()
         # character_selection.run()
-
+        opponent = None
+        
         # Check the selected character and create instances accordingly
-        player = Character(200, 450, False, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
-        opponent = Character(700, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
-
-        # Create an instance of the GameConsumer and pass the player instance
-        game_consumer = GameConsumer(player=player)
+        if self.match["current player"] == 1:
+            player = Character(1, 200, 450, False, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
+            opponent = Character(2, 700, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+        else:
+            player = Character(1, 700, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+            opponent = Character(2, 200, 450, False, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
+        print(self.match["current player"])
 
         async def connect_to_server(self):
             uri = f"ws://localhost:8001/ws/game/{self.match_id}/"
@@ -118,19 +126,15 @@ class GameClient:
                     player.draw(self.screen)
                     opponent.draw(self.screen)
 
-                    # Update the characters' positions and health based on the received data
-                    game_consumer.player = player
-                    game_consumer.opponent = opponent
-
                     # Update display
                     pygame.display.update()
-
 
                     # Construct game data
                     game_data = {
                         # Player 1
                         "player_health": player.health,
                         "opponent_health": opponent.health,
+                        "current_player": self.match["current player"],
                     }
 
                     # Convert game data to JSON format
@@ -146,9 +150,6 @@ class GameClient:
                     # Update the characters' positions and health based on the received data
                     player.health = server_data.get("player_health", player.health)
                     opponent.health = server_data.get("opponent_health", opponent.health)
-
-                    #print("player1", player.health)
-                    print("opponent", opponent.health)
 
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -168,3 +169,7 @@ if __name__ == "__main__":
     # Run the game client
     client = GameClient()
     client.run()
+
+
+
+
