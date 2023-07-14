@@ -47,9 +47,9 @@ class LoginScreen:
                         self.get_api_token()
                         self.match = self.join_create_match()
                         if self.username == self.match["player1"]:
-                            self.match["current player"] = 1
+                            self.match["current player"] = 0
                         else:
-                            self.match["current player"] = 2
+                            self.match["current player"] = 1
                         return self.match
                 else:
                     if self.is_username_active() and len(self.username) < 25:

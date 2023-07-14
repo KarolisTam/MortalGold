@@ -1,6 +1,5 @@
 #gameclient.py
 import pygame
-import sys
 import asyncio
 import websockets
 import json
@@ -9,7 +8,6 @@ from character import Character
 from background import AnimatedBackground
 from character_selection import CharacterSelectionScreen
 from login import LoginScreen
-from mortalgold.gameapp.consumers import GameConsumer
 
 
 class GameClient:
@@ -62,9 +60,6 @@ class GameClient:
         self.TRUMP_ANIMATION_STEPS = [10, 5, 1, 5, 1, 1, 1, 1]
 
     def draw_health_bar(self, health, x, y):
-        if health is None:
-            return
-
         ratio = health / 100
         pygame.draw.rect(self.screen, self.WHITE, (x - 2, y - 2, 404, 34))
         pygame.draw.rect(self.screen, self.RED, (x, y, 400, 30))
@@ -85,20 +80,17 @@ class GameClient:
         # # Create an instance of the character selection screen
         # character_selection = CharacterSelectionScreen()
         # character_selection.run()
-
-        opponent = None
+        player = Character(1, 200, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+        opponent = Character(2, 700, 450, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
         
-        # Check the selected character and create instances accordingly
-        if self.match["current player"] == 1:
-            self.player_id = self.match["player1_id"]
-            player = Character(1, 200, 450, False, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
-            opponent = Character(2, 700, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
-            print(self.player_id)
-        else:
-            self.player_id = self.match["player2_id"]
-            player = Character(1, 700, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
-            opponent = Character(2, 200, 450, False, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
-        print(self.match["current player"])
+        # # Check the selected character and create instances accordingly
+        # if self.match["current player"] == 0:
+        #     player =  musk
+        #     opponent = putin
+        # else:
+        #     opponent = musk
+        #     player = putin
+
 
 
         async def connect_to_server(self):
@@ -114,9 +106,11 @@ class GameClient:
                     # Draw background
                     self.screen.blit(self.scaled_bg, (0, 0))
 
+                    if self.match["current player"] == 0:
                     # Character movement
-                    player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
-                    # opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
+                        player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
+                    else:
+                        opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
 
                     # Show player stats
                     self.draw_health_bar(player.health, 20, 20)
@@ -124,49 +118,52 @@ class GameClient:
 
                     # Update characters
                     player.update()
+                    print("player movement", player.rect.x, player.rect.y)
                     opponent.update()
+                    print("opponent movement", opponent.rect.x, opponent.rect.y)
 
                     # Draw characters
                     player.draw(self.screen)
                     opponent.draw(self.screen)
 
-                    # Update display
-                    pygame.display.update()
-
                     # Construct game data
                     game_data = {
-                        # Player 1
-                        # "current_player": self.match["current player"],
-                        "player_id": self.player_id,
-
+                        "player_id": self.match["current player"],
+                        # "player action": player.action,
                         "player_health": player.health,
                         "player_position_x": player.rect.x,
                         "player_position_y": player.rect.y,
+
 
                         "opponent_health": opponent.health,
                         "opponent_position_x": opponent.rect.x,
                         "opponent_position_y": opponent.rect.y
                     }
-
                     # Convert game data to JSON format
                     game_data_json = json.dumps(game_data)
+                    print("sending", game_data_json)
+
 
                     # Send game data to the server
+                    # if player.action > 0:
                     await websocket.send(game_data_json)
 
                     # Receive game data from the server
+                    # async for server_data_json in websocket:
                     server_data_json = await websocket.recv()
                     server_data = json.loads(server_data_json)
-
-                    # Update the characters' health based on the received data
+                    print("receve", server_data)
+                        # Update the characters' health based on the received data
                     player.health = server_data.get("player_health", player.health)
                     player.rect.x = server_data.get("player_position_x", player.health)
                     player.rect.y = server_data.get("player_position_y", player.health)
 
                     opponent.health = server_data.get("opponent_health", opponent.health)
-                    opponent.rect.x = server_data.get("opponent_position_x", opponent.health)
-                    opponent.rect.y = server_data.get("opponent_position_y", opponent.health)
+                    opponent.rect.x = server_data.get("opponent_position_x", opponent.rect.x)
+                    opponent.rect.y = server_data.get("opponent_position_y", opponent.rect.y)
+                    pygame.display.update()
 
+                    # Update display
 
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
