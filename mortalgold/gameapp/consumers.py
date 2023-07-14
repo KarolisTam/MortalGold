@@ -5,13 +5,13 @@ import json
 class GameConsumer(AsyncWebsocketConsumer):
     player = [
         {
-            "health": 100,
-            "x": 200,
-            "y": 450 
+            "x": int(200),
+            "y": int(450) ,
+            "action": int(0),
         }, {
-            "health": 100,
-            "x": 700,
-            "y": 450 
+            "x": int(700),
+            "y": int(450) ,
+            "action": int(0),
         },
     ]
 
@@ -70,80 +70,71 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         # Custom logic based on event type
         if event_type == "player_connected":
-            if self.player_id is None:
-                self.player_id = player_id
-                print(f"Player {player_id} connected as the main player.")
-            elif self.second_player_id is None:
-                self.second_player_id = player_id
-                print(f"Player {player_id} connected as the second player.")
-            else:
-                print(f"Player {player_id} connected but the game is full.")
+            print(f"Player {player_id} connected.")
         elif event_type == "player_disconnected":
-            if player_id == self.player_id:
-                self.player_id = None
-                print(f"Player {player_id} disconnected as the main player.")
-            elif player_id == self.second_player_id:
-                self.second_player_id = None
-                print(f"Player {player_id} disconnected as the second player.")
-            else:
-                print(f"Unknown player {player_id} disconnected.")
-
-
-
+            print(f"Player {player_id} disconnected.")
 
     async def game_event(self, event):
         # Update the game state based on the received game data
         game_data = event["game_data"]
-        
         player_id = game_data.get("player_id")
         opponent_id = int(not player_id)
+        print(opponent_id)
         print(player_id, opponent_id)
+        print("opponent action:", self.player[opponent_id]['action'])
+        print("player action:", self.player[player_id]['action'])
 
-        self.player[player_id]['health'] = game_data.get('player_health')
-        self.player[opponent_id]['health'] = game_data.get('opponent_health')
-        self.player[player_id]['x'] = game_data.get('player_position_x')
-        self.player[opponent_id]['x'] = game_data.get('opponent_position_x')
-        self.player[player_id]['y'] = game_data.get('player_position_y')
-        self.player[opponent_id]['y'] = game_data.get('opponent_position_y')
+        if game_data.get('player_position_x') is not None:
+            self.player[player_id]['x'] = game_data.get('player_position_x')
+        else:
+            pass
+            # self.player[player_id]['x'] = 200
+
+        if game_data.get('player_position_y') is not None:
+            self.player[player_id]['y'] = game_data.get('player_position_y')
+        else:
+            pass
+            # self.player[player_id]['y'] =450
+
+        if game_data.get('player_action') is not None:
+            self.player[player_id]['action'] = game_data.get('player_action')
+        else:
+            pass
+            # self.player[player_id]['action'] = 0
+
+        if  game_data.get('opponent_position_x') is not None:
+            self.player[opponent_id]['x'] = game_data.get('opponent_position_x')
+        else:
+            pass
+            # self.player[opponent_id]['x'] = 700
+
+        if game_data.get('opponent_position_y') is not None:
+            self.player[opponent_id]['y'] = game_data.get('opponent_position_y')
+        else:
+            pass
+            # self.player[opponent_id]['y'] = 450
+
+        if game_data.get('opponent_action') is not None:
+            self.player[opponent_id]['action'] = game_data.get('opponent_action')
+        else:
+            pass
+            # self.player[opponent_id]['action'] = 0
         
-
-
-        # self.player_health = 100
-        # self.player_position_x = 200
-        # self.player_position_y = 450
-
-        # self.opponent_health = 100
-        # self.opponent_position_x = 700
-        # self.opponent_position_y = 450
-
-        # self.player_id = game_data.get("player_id")
-
-        # self.player_health = game_data.get("player_health")
-        # self.player_position_x = game_data.get("player_position_x")
-        # self.player_position_y = game_data.get("player_position_y")
-
-        # self.opponent_health = game_data.get("opponent_health")
-        # self.opponent_position_x = game_data.get("opponent_position_x")
-        # self.opponent_position_y = game_data.get("opponent_position_y")
-        # print("self.player_health", self.player_health)
-        # print("self.player_position_x",  self.player_position_x)
-        # print("self.player_position_y", self.player_position_y)
-        # print("sending data", self.player_id)
-        # print("self.opponent_health", self.opponent_health)
-        # print("self.opponent_position_x",  self.opponent_position_x)
-        # print("self.opponent_position_y", self.opponent_position_y)
-        # print("sending data", self.player_id)
-
         # Send the updated game data to the client
         await self.send(text_data=json.dumps({
             # "player_id": self.player_id,
-            "player_health": self.player[player_id]['health'],
             "player_position_x":  self.player[player_id]['x'],
-            "player_position_y":  self.player[opponent_id]['y'],
+            "player_position_y":  self.player[player_id]['y'],
+            "player_action":  self.player[player_id]['action'],
 
-            "opponent_health": self.player[opponent_id]['health'],
             "opponent_position_x": self.player[opponent_id]['x'],
-            "opponent_position_y": self.player[opponent_id]['y']
-            
+            "opponent_position_y": self.player[opponent_id]['y'],
+            "opponent_action": self.player[opponent_id]['action'],
         }))
+        print("player_position_x",  self.player[player_id]['x'],)
+        print("player_position_y",  self.player[player_id]['y'],)
+        print("player_action",  self.player[player_id]['action'],)
 
+        print("opponent_position_x", self.player[opponent_id]['x'])
+        print("opponent_position_y", self.player[opponent_id]['y'])
+        print("opponent_action", self.player[opponent_id]['action'])

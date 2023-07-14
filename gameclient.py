@@ -80,8 +80,16 @@ class GameClient:
         # # Create an instance of the character selection screen
         # character_selection = CharacterSelectionScreen()
         # character_selection.run()
-        player = Character(1, 200, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
-        opponent = Character(2, 700, 450, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
+
+        # if self.match["current player"] == 0:
+        # # Character movement
+        #     player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
+        # else:
+        #     opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
+        
+        # if self.match["current player"] == 0:    
+        player = Character(0, 200, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+        opponent = Character(1, 700, 450, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
         
         # # Check the selected character and create instances accordingly
         # if self.match["current player"] == 0:
@@ -91,8 +99,6 @@ class GameClient:
         #     opponent = musk
         #     player = putin
 
-
-
         async def connect_to_server(self):
             uri = f"ws://localhost:8001/ws/game/{self.match_id}/"
             async with websockets.connect(uri) as websocket:
@@ -100,21 +106,25 @@ class GameClient:
                 while run:
                     self.clock.tick(self.FPS)
 
-                    # Update the background animation
-                    background.update()
-
                     # Draw background
                     self.screen.blit(self.scaled_bg, (0, 0))
 
-                    if self.match["current player"] == 0:
-                    # Character movement
-                        player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
-                    else:
-                        opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
+                    # Update display
+                    background.update()
+
+                    # Draw characters
+                    player.draw(self.screen)
+                    opponent.draw(self.screen)
 
                     # Show player stats
                     self.draw_health_bar(player.health, 20, 20)
                     self.draw_health_bar(opponent.health, 860, 20)
+
+                    # Character movement
+                    if self.match["current player"] == 0:
+                        player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
+                    else:
+                        opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
 
                     # Update characters
                     player.update()
@@ -122,56 +132,51 @@ class GameClient:
                     opponent.update()
                     print("opponent movement", opponent.rect.x, opponent.rect.y)
 
-                    # Draw characters
-                    player.draw(self.screen)
-                    opponent.draw(self.screen)
-
-                    # Construct game data
-                    game_data = {
-                        "player_id": self.match["current player"],
-                        # "player action": player.action,
-                        "player_health": player.health,
-                        "player_position_x": player.rect.x,
-                        "player_position_y": player.rect.y,
-
-
-                        "opponent_health": opponent.health,
-                        "opponent_position_x": opponent.rect.x,
-                        "opponent_position_y": opponent.rect.y
-                    }
+                    if self.match["current player"] == 0:
+                        game_data = {
+                            "player_id": self.match["current player"],
+                            "player_position_x": player.rect.x,
+                            "player_position_y": player.rect.y,
+                            "player_action": player.action,
+                        }
+                    else:
+                        game_data = {
+                            "player_id": self.match["current player"],
+                            "opponent_position_x": opponent.rect.x,
+                            "opponent_position_y": opponent.rect.y,
+                            "opponent_action": opponent.action,}
                     # Convert game data to JSON format
                     game_data_json = json.dumps(game_data)
                     print("sending", game_data_json)
-
-
                     # Send game data to the server
-                    # if player.action > 0:
+                    await asyncio.sleep(0.025)
                     await websocket.send(game_data_json)
 
                     # Receive game data from the server
                     # async for server_data_json in websocket:
                     server_data_json = await websocket.recv()
+                    # Update the characters' health based on the received data
                     server_data = json.loads(server_data_json)
+                    # Introduce a delay of 0.5 seconds
+                    # await asyncio.sleep(0.009)
                     print("receve", server_data)
-                        # Update the characters' health based on the received data
-                    player.health = server_data.get("player_health", player.health)
-                    player.rect.x = server_data.get("player_position_x", player.health)
-                    player.rect.y = server_data.get("player_position_y", player.health)
 
-                    opponent.health = server_data.get("opponent_health", opponent.health)
-                    opponent.rect.x = server_data.get("opponent_position_x", opponent.rect.x)
-                    opponent.rect.y = server_data.get("opponent_position_y", opponent.rect.y)
+                    if self.match["current player"] == 0:
+                        opponent.rect.x = server_data.get("opponent_position_x", int(opponent.rect.x))
+                        opponent.rect.y = server_data.get("opponent_position_y", int(opponent.rect.y))
+                        opponent.action = server_data.get("opponent_action", int(opponent.action))
+                    else:
+                        player.rect.x = server_data.get("player_position_x", int(player.rect.x))
+                        player.rect.y = server_data.get("player_position_y", int(player.rect.y))
+                        player.action = server_data.get("player_action", int(player.action))
+
                     pygame.display.update()
+                    # Construct game data
 
-                    # Update display
 
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             run = False
-
-                    # Handle game logic
-                    # ...
-
                 # Exit Pygame
                 pygame.quit()
 
