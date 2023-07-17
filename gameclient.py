@@ -79,11 +79,19 @@ class GameClient:
         if not self.match_id:
             return
 
+        self.player = self.match["current player"]
+        self.opponent = int(not self.match["current player"])
+
+
         # Create animated background
         background = AnimatedBackground()
 
-        player = Character(self.match["current player"], 200, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
-        opponent = Character(int(not self.match["current player"]), 700, 300, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
+        if not self.player:
+            player = Character(self.player, 200, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+            opponent = Character(self.opponent, 700, 300, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
+        else:
+            opponent = Character(self.player, 200, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+            player = Character(self.opponent, 700, 300, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)     
 
         uri = f"ws://localhost:8001/ws/game/{self.match_id}/"
         try:
@@ -114,12 +122,18 @@ class GameClient:
                     self.draw_health_bar(opponent.health, 860, 20)
 
                     # player movement check
+
                     player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
-                    # opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
+                    # ensure players face each other
+                    if player.rect.centerx > opponent.rect.centerx:
+                        opponent.flip = False
+                    else:
+                        opponent.flip = True
+                    #opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
 
                     # Update characters
-                    # player.update()
-                    # opponent.update()
+                    # player.update(player.action)
+                    # opponent.update(opponent.action)
 
                     pygame.display.update()
 
@@ -129,7 +143,6 @@ class GameClient:
                         "player_position_x": player.rect.x,
                         "player_position_y": player.rect.y,
                         "player_action": player.action,
-                        "player_attack_type": player.attack_type
                     }
 
                     if game_data != self.last_sent_data:
@@ -152,10 +165,10 @@ class GameClient:
 
                         player.rect.x = server_data.get(f"player{player_id}_position_x", int(player.rect.x))
                         player.rect.y = server_data.get(f"player{player_id}_position_y", int(player.rect.y))
-                        player.update(server_data.get(f"player{player_id}_action", int(player.action)))
+                        player.action = server_data.get(f"player{player_id}_action", int(player.action))
                         opponent.rect.x = server_data.get(f"player{opponent_id}_position_x", int(opponent.rect.x))
                         opponent.rect.y = server_data.get(f"player{opponent_id}_position_y", int(opponent.rect.y))
-                        opponent.update(server_data.get(f"player{opponent_id}_action", int(opponent.action)))
+                        opponent.action = server_data.get(f"player{opponent_id}_action", int(opponent.action))
 
                         logging.debug("Updated player and opponent positions.")
                     except asyncio.TimeoutError:
