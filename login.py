@@ -43,13 +43,15 @@ class LoginScreen:
                     self.toggle_password_active()
                 elif event.key == K_RETURN:
                     if self.username and self.password:
-                        self.get_api_token()
+                        if not self.get_api_token():
+                            return None  # Token retrieval failed, return None to prevent the match from starting
                         self.match = self.join_create_match()
-                        if self.username == self.match["player1"]:
-                            self.match["current player"] = 0
-                        else:
-                            self.match["current player"] = 1
-                        return self.match
+                        if self.match:
+                            if self.username == self.match["player1"]:
+                                self.match["current player"] = 1
+                            else:
+                                self.match["current player"] = 2
+                            return self.match
                 else:
                     if self.is_username_active() and len(self.username) < 25:
                         self.username += event.unicode
@@ -66,13 +68,15 @@ class LoginScreen:
                         self.username_active = False
                     elif self.login_button_rect.collidepoint(mouse_pos):
                         if self.username and self.password:
-                            self.get_api_token()
+                            if not self.get_api_token():
+                                return None  # Token retrieval failed, return None to prevent the match from starting
                             self.match = self.join_create_match()
-                            if self.username == self.match["player1"]:
-                                self.match["current player"] = 1
-                            else:
-                                self.match["current player"] = 2
-                            return self.match
+                            if self.match:
+                                if self.username == self.match["player1"]:
+                                    self.match["current player"] = 1
+                                else:
+                                    self.match["current player"] = 2
+                                return self.match
                     elif self.cancel_button_rect.collidepoint(mouse_pos):
                         pygame.quit()
 
@@ -93,16 +97,21 @@ class LoginScreen:
             return self.username
         except Exception as e:
             print(e)
-            self.error_message = 'Failed to get token. Please try again.'
-            self.username = ''  
+            self.error_message = 'Password or username incorrect. Please try again.'
+            self.username = ''
             self.password = ''
-            return
-
+            self.token = None
+            return None
+        
     def join_create_match(self):
+        if self.token is None:
+            self.error_message = 'Failed to get token. Please try again.'
+            return None
+
         self.header = {
-        "Accept": "*/*",
-        "User-Agent": "Mortal Gold",
-        "Authorization": "Token " + self.token['token']
+            "Accept": "*/*",
+            "User-Agent": "Mortal Gold",
+            "Authorization": "Token " + self.token['token']
         }
         payload = ""
         try:
@@ -113,9 +122,8 @@ class LoginScreen:
             return match
         except Exception as e:
             print(e)
-            self.error_message = 'Failed to connect. Please try again.'
-            return
-
+            self.error_message = 'Failed connetect to server. Please try again.'
+            return None
 
     def display(self):
         background = pygame.image.load('assets/images/background/bg.png')
@@ -163,7 +171,7 @@ class LoginScreen:
 
         if self.error_message:
             error = self.font.render(self.error_message, True, self.WHITE)
-            self.screen.blit(error, (600, 360))
+            self.screen.blit(error, (250, 500))
 
         pygame.display.flip()
 
