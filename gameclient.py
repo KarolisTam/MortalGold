@@ -82,8 +82,8 @@ class GameClient:
         # Create animated background
         background = AnimatedBackground()
 
-        player = Character(0, 200, 450, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
-        opponent = Character(1, 700, 450, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
+        player = Character(self.match["current player"], 300, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+        opponent = Character(self.match["current player"], 300, 300, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
 
         uri = f"ws://localhost:8001/ws/game/{self.match_id}/"
         try:
@@ -186,3 +186,6 @@ class GameClient:
 if __name__ == "__main__":
     client = GameClient()
     asyncio.get_event_loop().run_until_complete(client.connect_to_server())
+
+
+
