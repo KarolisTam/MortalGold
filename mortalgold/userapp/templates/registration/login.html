@@ -4,11 +4,16 @@
 {% if form.errors %}
 <p class="box box-error">Login error. Please try again.</p>
 {% endif %}
-<form method="post" action="{% url 'login' %}">
-{% csrf_token %}
-{{ form.as_p }}
-<p><button type="submit">Log in</button></p>
-</form>
-<p><a href="{% url 'password_reset' %}">Forgot password?</a></p>
-<p>If you do not have an account, please <a href="{% url 'signup' %}">sign up</a>.
+    <div class="container">
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <p><button type="submit">Log in</button></p>
+        </form>
+    </div>
+    <div class="container">
+        <a href="{% url 'password_reset' %}">Forgot password?</a>
+        <p>If you do not have an account, please</p>
+        <a href="{% url 'signup' %}">sign up</a>.
+    </div>
 {% endblock content %}

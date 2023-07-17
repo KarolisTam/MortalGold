@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Bye {{ block.super }}{% endblock title %}
 {% block content %}
+<div class="container">
 <h1>See you later</h1>
 <p>You are always welcome back to Game Room.</p>
-<p><a href="{% url 'login' %}">Log in</a> again.</p>
+<div class="container">
+    <p><a href="{% url 'login' %}">Log in</a> again.</p>
+</div>
 {% endblock content %}
