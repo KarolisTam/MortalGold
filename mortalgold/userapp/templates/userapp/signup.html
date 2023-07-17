@@ -2,7 +2,8 @@
 {% block title %}Sign up for {{ block.super }}{% endblock title %}
 {% block content %}
 <form action="{{ request.path }}" method="post">
-    {% csrf_token %}
+{% csrf_token %}
+<div class="container">
     <p>
         <input type="text" name="first_name" value="{{ request.POST.first_name }}" placeholder="Enter your first name" style="width: 250px;">
     </p>      
@@ -23,5 +24,6 @@
     </p><br>
     <p><button type="submit">Confirm Sign Up</button></p>
     {% comment %} <p>If you have already an account, you can <a href="{% url 'login' %}" style="color: red;">login</a> instead.</p> {% endcomment %}
+</div>
 </form>
 {% endblock content %}
