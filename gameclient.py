@@ -1,3 +1,5 @@
+
+
 #gameclient.py
 import pygame
 import asyncio
@@ -129,12 +131,10 @@ class GameClient:
                         opponent.flip = False
                     else:
                         opponent.flip = True
-                    #opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
 
                     # Update characters
-                    # player.update(player.action)
-                    # opponent.update(opponent.action)
-
+                    player.update()
+                    opponent.update()
                     pygame.display.update()
 
                     # Send game data to the server only if there are changes
@@ -143,6 +143,9 @@ class GameClient:
                         "player_position_x": player.rect.x,
                         "player_position_y": player.rect.y,
                         "player_action": player.action,
+                        "player_health": player.health,
+
+                        "opponent_health": opponent.health,
                     }
 
                     if game_data != self.last_sent_data:
@@ -166,9 +169,17 @@ class GameClient:
                         player.rect.x = server_data.get(f"player{player_id}_position_x", int(player.rect.x))
                         player.rect.y = server_data.get(f"player{player_id}_position_y", int(player.rect.y))
                         player.action = server_data.get(f"player{player_id}_action", int(player.action))
+                        
                         opponent.rect.x = server_data.get(f"player{opponent_id}_position_x", int(opponent.rect.x))
                         opponent.rect.y = server_data.get(f"player{opponent_id}_position_y", int(opponent.rect.y))
                         opponent.action = server_data.get(f"player{opponent_id}_action", int(opponent.action))
+                        
+                        if not self.player:
+                            player.health = server_data.get(f"player{player_id}_health", int(player.health))
+                            #opponent.health = server_data.get(f"player{opponent_id}_health", int(opponent.health))
+                        else:
+                            #opponent.health = server_data.get(f"player{player_id}_health", int(player.health))
+                            opponent.health = server_data.get(f"player{opponent_id}_health", int(opponent.health))
 
                         logging.debug("Updated player and opponent positions.")
                     except asyncio.TimeoutError:
