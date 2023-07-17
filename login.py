@@ -59,10 +59,8 @@ class LoginScreen:
             elif event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:  # 1 represents the left mouse button
                     mouse_pos = pygame.mouse.get_pos()
-                    if self.is_username_active():
-                        login_button_rect = pygame.Rect(200, 400, 200, 50)
-                        cancel_button_rect = pygame.Rect(450, 400, 200, 50)
-                        if login_button_rect.collidepoint(mouse_pos):
+                    if self.is_username_active() or self.is_password_active():
+                        if self.login_button_rect.collidepoint(mouse_pos):
                             if self.username and self.password:
                                 self.get_api_token()
                                 self.match = self.join_create_match()
@@ -71,9 +69,8 @@ class LoginScreen:
                                 else:
                                     self.match["current player"] = 2
                                 return self.match
-                        elif cancel_button_rect.collidepoint(mouse_pos):
-                            self.username = ''
-                            self.password = ''
+                        elif self.cancel_button_rect.collidepoint(mouse_pos):
+                            pygame.quit()
 
         return None
 
@@ -127,8 +124,8 @@ class LoginScreen:
         # Truncate the username to a maximum of 25 characters
         truncated_username = self.username[:25]
 
-        username_input = self.font.render(truncated_username, True, self.BLACK)
-        password_input = self.font.render('*' * len(self.password), True, self.BLACK)
+        username_input = self.font.render(truncated_username, True, self.WHITE)
+        password_input = self.font.render('*' * len(self.password), True, self.WHITE)
         username_rect = pygame.Rect(200, 200, 400, 50)
         password_rect = pygame.Rect(200, 300, 400, 50)
         pygame.draw.rect(self.screen, self.WHITE, username_rect, 2)
@@ -148,18 +145,18 @@ class LoginScreen:
         self.screen.blit(username_input, (username_input_x, username_input_y))
         self.screen.blit(password_input, (password_input_x, password_input_y))
 
-        login_button_rect = pygame.Rect(200, 400, 200, 50)
-        cancel_button_rect = pygame.Rect(450, 400, 200, 50)
-        pygame.draw.rect(self.screen, self.WHITE, login_button_rect, 2)
-        pygame.draw.rect(self.screen, self.WHITE, cancel_button_rect, 2)
-        login_button_text = self.font.render('Prisijungti', True, self.WHITE)
-        cancel_button_text = self.font.render('Atšaukti', True, self.WHITE)
-        self.screen.blit(login_button_text, (225, 410))
-        self.screen.blit(cancel_button_text, (475, 410))
+        self.login_button_rect = pygame.Rect(200, 400, 180, 50)
+        self.cancel_button_rect = pygame.Rect(418, 400, 182, 50)
+        pygame.draw.rect(self.screen, self.WHITE, self.login_button_rect, 2)
+        pygame.draw.rect(self.screen, self.WHITE, self.cancel_button_rect, 2)
+        login_button_text = self.font.render('Login', True, self.WHITE)
+        cancel_button_text = self.font.render('Exit', True, self.WHITE)
+        self.screen.blit(login_button_text, (258, 413))
+        self.screen.blit(cancel_button_text, (487, 413))
 
         if self.error_message:
             error = self.font.render(self.error_message, True, self.WHITE)
-            self.screen.blit(error, (800, 360))
+            self.screen.blit(error, (600, 360))
 
         pygame.display.flip()
 
