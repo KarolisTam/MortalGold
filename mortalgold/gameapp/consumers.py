@@ -9,8 +9,8 @@ logger.setLevel(logging.DEBUG)
 
 class GameConsumer(AsyncWebsocketConsumer):
     players = [
-        {"x": 200, "y": 450, "action": 0, "attack_type": 0},
-        {"x": 700, "y": 450, "action": 0, "attack_type": 0}
+        {"x": 200, "y": 450, "action": 0, "health": 100},
+        {"x": 700, "y": 450, "action": 0, "health": 100}
     ]
 
     async def connect(self):
@@ -47,6 +47,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         game_data = json.loads(text_data)
+
+
         await self.send_game_data_to_group(game_data)
         logger.debug("Received data: %s", game_data)
 
@@ -75,7 +77,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.players[player_id]['x'] = game_data.get('player_position_x')
         self.players[player_id]['y'] = game_data.get('player_position_y')
         self.players[player_id]['action'] = game_data.get('player_action')
-        self.players[player_id]['attack_type'] = game_data.get('player_attack_type')
+        self.players[player_id]['health'] = game_data.get('player_health')
+
+        self.players[opponent_id]['health'] = game_data.get('opponent_health')
 
         logger.debug("Updated player Data: %s", self.players[player_id])
 
@@ -85,10 +89,10 @@ class GameConsumer(AsyncWebsocketConsumer):
             f"player{player_id}_position_x": self.players[player_id]['x'],
             f"player{player_id}_position_y": self.players[player_id]['y'],
             f"player{player_id}_action": self.players[player_id]['action'],
-            f"player{player_id}_attack_type": self.players[player_id]['attack_type'],
+            f"player{player_id}_health": self.players[player_id]['health'],
 
             f"player{opponent_id}_position_x": self.players[opponent_id]['x'],
             f"player{opponent_id}_position_y": self.players[opponent_id]['y'],
             f"player{opponent_id}_action": self.players[opponent_id]['action'],
-            f"player{opponent_id}_attack_type": self.players[opponent_id]['attack_type']
+            f"player{opponent_id}_health": self.players[opponent_id]['health'],
         }))

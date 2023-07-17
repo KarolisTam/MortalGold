@@ -110,27 +110,33 @@ class Character():
         if self.health <= 0:
             self.health = 0
             self.alive = False
-            self.update_action(6) # death
+            self.update_action(6)  # death
         elif self.hit == True:
-            self.update_action(5) # getHit
+            self.update_action(5)  # getHit
         elif self.blocking == True:
-            self.update_action(7) # block
+            self.update_action(7)  # block
         elif self.attacking == True:
             if self.attack_type == 1:
-                self.update_action(3) # attack
+                self.update_action(3)  # attack
             elif self.attack_type == 2:
-                self.update_action(4) # attack 2
+                self.update_action(4)  # attack 2
         elif self.jump == True:
-            self.update_action(2) #jump
+            self.update_action(2)  # jump
         elif self.running == True:
-            self.update_action(1) #running
+            self.update_action(1)  # running
         else:
-            self.update_action(0) #idle
+            self.update_action(0)  # idle
 
+        # Call the update_animation() method to update the animation frames.
+        self.update_animation()
+
+        return self.health
+
+    def update_animation(self):
         animation_cooldown = 50
         # update image
         self.image = self.animation_list[self.action][self.frame_index]
-        # check if enought time has passed since the last update
+        # check if enough time has passed since the last update
         if pygame.time.get_ticks() - self.update_time > animation_cooldown:
             self.frame_index += 1
             self.update_time = pygame.time.get_ticks()
@@ -141,20 +147,18 @@ class Character():
             if self.alive == False:
                 self.frame_index = len(self.animation_list[self.action]) - 1
             else:
-
                 self.frame_index = 0
                 # check if attack was executed
                 if self.action == 3 or self.action == 4:
                     self.attacking = False
                     self.attack_cooldown = 20
-                # check if damage was taken
+                # check if damage was taken~
                 if self.action == 5:
                     self.hit = False
-                    #if the player was in the middle of an attack then attack is stopped
+                    # if the player was in the middle of an attack then attack is stopped
                     self.attacking = False
                     self.attack_cooldown = 20
-        return self.health
-
+                    
     def attack(self, surface, target):
         if self.attack_cooldown == 0:
             self.attacking = True
