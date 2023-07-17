@@ -82,8 +82,8 @@ class GameClient:
         # Create animated background
         background = AnimatedBackground()
 
-        player = Character(self.match["current player"], 300, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
-        opponent = Character(self.match["current player"], 300, 300, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
+        player = Character(self.match["current player"], 200, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+        opponent = Character(int(not self.match["current player"]), 700, 300, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
 
         uri = f"ws://localhost:8001/ws/game/{self.match_id}/"
         try:
@@ -91,6 +91,11 @@ class GameClient:
                 logging.debug("WebSocket connection established.")
                 run = True
                 while run:
+
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            run = False
+
                     self.clock.tick(self.FPS)
                     logging.debug("Inside the game loop.")
 
@@ -109,36 +114,23 @@ class GameClient:
                     self.draw_health_bar(opponent.health, 860, 20)
 
                     # player movement check
-                    if self.match["current player"] == 0:
-                        player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
-                    else:
-                        opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
+                    player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
+                    # opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
 
                     # Update characters
-                    player.update()
-                    opponent.update()
+                    # player.update()
+                    # opponent.update()
 
                     pygame.display.update()
 
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            run = False
-
                     # Send game data to the server only if there are changes
-                    if self.match["current player"] == 0:
-                        game_data = {
-                            "player_id": self.match["current player"],
-                            "player_position_x": player.rect.x,
-                            "player_position_y": player.rect.y,
-                            "player_action": player.action,
-                        }
-                    else:
-                        game_data = {
-                            "player_id": self.match["current player"],
-                            "opponent_position_x": opponent.rect.x,
-                            "opponent_position_y": opponent.rect.y,
-                            "opponent_action": opponent.action,
-                        }
+                    game_data = {
+                        "player_id": self.match["current player"],
+                        "player_position_x": player.rect.x,
+                        "player_position_y": player.rect.y,
+                        "player_action": player.action,
+                        "player_attack_type": player.attack_type
+                    }
 
                     if game_data != self.last_sent_data:
                         game_data_json = json.dumps(game_data)
@@ -151,19 +143,19 @@ class GameClient:
                     # Receive game data from the server
                     logging.debug("Waiting to receive game data from the server.")
                     try:
+                        player_id = self.match["current player"]
+                        opponent_id = int(not self.match["current player"])
                         # After receiving game data from the server
                         server_data_json = await asyncio.wait_for(websocket.recv(), timeout=0.05)
                         logging.debug(f"Received game data from the server: {server_data_json}")
                         server_data = json.loads(server_data_json)
 
-                        if self.match["current player"] == 0:
-                            opponent.rect.x = server_data.get("opponent_position_x", int(opponent.rect.x))
-                            opponent.rect.y = server_data.get("opponent_position_y", int(opponent.rect.y))
-                            opponent.action = server_data.get("opponent_action", int(opponent.action))
-                        else:
-                            player.rect.x = server_data.get("player_position_x", int(player.rect.x))
-                            player.rect.y = server_data.get("player_position_y", int(player.rect.y))
-                            player.action = server_data.get("player_action", int(player.action))
+                        player.rect.x = server_data.get(f"player{player_id}_position_x", int(player.rect.x))
+                        player.rect.y = server_data.get(f"player{player_id}_position_y", int(player.rect.y))
+                        player.update(server_data.get(f"player{player_id}_action", int(player.action)))
+                        opponent.rect.x = server_data.get(f"player{opponent_id}_position_x", int(opponent.rect.x))
+                        opponent.rect.y = server_data.get(f"player{opponent_id}_position_y", int(opponent.rect.y))
+                        opponent.update(server_data.get(f"player{opponent_id}_action", int(opponent.action)))
 
                         logging.debug("Updated player and opponent positions.")
                     except asyncio.TimeoutError:
@@ -175,7 +167,7 @@ class GameClient:
                     except Exception as e:
                         logging.debug(f"An error occurred while receiving game data: {e}")
                         break
-                    pygame.display.update()
+                    # pygame.display.update()
         except Exception as e:
             logging.error(f"Error occurred during connection: {e}")
             raise

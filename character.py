@@ -105,27 +105,27 @@ class Character():
         self.rect.x += dx
         self.rect.y += dy
     
-    def update(self):
+    def update(self, action):
         # check what action the player is performing
         if self.health <= 0:
             self.health = 0
             self.alive = False
-            self.update_action(6) # death
+            self.update_action(action) # death
         elif self.hit == True:
-            self.update_action(5) # getHit
+            self.update_action(action) # getHit
         elif self.blocking == True:
-            self.update_action(7) # block
+            self.update_action(action) # block
         elif self.attacking == True:
             if self.attack_type == 1:
-                self.update_action(3) # attack
+                self.update_action(action) # attack
             elif self.attack_type == 2:
-                self.update_action(4) # attack 2
+                self.update_action(action) # attack 2
         elif self.jump == True:
-            self.update_action(2) #jump
+            self.update_action(action) #jump
         elif self.running == True:
-            self.update_action(1) #running
+            self.update_action(action) #running
         else:
-            self.update_action(0) #idle
+            self.update_action(action) #idle
 
         animation_cooldown = 50
         # update image
