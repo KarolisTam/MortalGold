@@ -1,4 +1,4 @@
-#cunsumers.py
+# consumers.py
 import json
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -9,11 +9,12 @@ logger.setLevel(logging.DEBUG)
 
 class GameConsumer(AsyncWebsocketConsumer):
     players = [
-        {"x": 700, "y": 450, "action": 0},
-        {"x": 200, "y": 450, "action": 0}
+        {"x": 200, "y": 450, "action": 0},
+        {"x": 700, "y": 450, "action": 0}
     ]
 
     async def connect(self):
+        # Get the match_id from the URL route parameters
         self.match_id = self.scope["url_route"]["kwargs"]["match_id"]
         self.match_group_name = f"game_{self.match_id}"
         await self.channel_layer.group_add(self.match_group_name, self.channel_name)
@@ -68,56 +69,32 @@ class GameConsumer(AsyncWebsocketConsumer):
         )
 
     def update_player_data(self, game_data, player_id, opponent_id):
-        player = self.players[player_id]
-        opponent = self.players[opponent_id]
+        # Update opponent position and action if available
+        if player_id == 0:
+            if game_data.get('opponent_position_x') is not None:
+                self.players[opponent_id]['x'] = game_data.get('opponent_position_x')
+            if game_data.get('opponent_position_y') is not None:
+                self.players[opponent_id]['y'] = game_data.get('opponent_position_y')
+            if game_data.get('opponent_action') is not None:
+                self.players[opponent_id]['action'] = game_data.get('opponent_action')
 
-        if game_data.get('player_position_x') is not None:
-            self.players[player_id]['x'] = game_data.get('player_position_x')
-        else:
-            pass
-            # self.player[player_id]['x'] = 200
+        # Update player position and action if available
+        if player_id == 1:
+            if game_data.get('player_position_x') is not None:
+                self.players[player_id]['x'] = game_data.get('player_position_x')
+            if game_data.get('player_position_y') is not None:
+                self.players[player_id]['y'] = game_data.get('player_position_y')
+            if game_data.get('player_action') is not None:
+                self.players[player_id]['action'] = game_data.get('player_action')
 
-        if game_data.get('player_position_y') is not None:
-            self.players[player_id]['y'] = game_data.get('player_position_y')
-        else:
-            pass
-            # self.player[player_id]['y'] =450
+        logger.debug("Updated Opponent Data: %s", self.players[opponent_id])
 
-        if game_data.get('player_action') is not None:
-            self.players[player_id]['action'] = game_data.get('player_action')
-        else:
-            pass
-            # self.player[player_id]['action'] = 0
-
-        if  game_data.get('opponent_position_x') is not None:
-            self.players[opponent_id]['x'] = game_data.get('opponent_position_x')
-        else:
-            pass
-            # self.player[opponent_id]['x'] = 700
-
-        if game_data.get('opponent_position_y') is not None:
-            self.players[opponent_id]['y'] = game_data.get('opponent_position_y')
-        else:
-            pass
-            # self.player[opponent_id]['y'] = 450
-
-        if game_data.get('opponent_action') is not None:
-            self.players[opponent_id]['action'] = game_data.get('opponent_action')
-        else:
-            pass
-        # Log the updated player and opponent data
-        logger.debug("Updated Player Data: %s", player)
-        logger.debug("Updated Opponent Data: %s", opponent)
 
     async def send_updated_game_data(self, player_id, opponent_id):
-        # player = self.players[player_id]
-        # opponent = self.players[opponent_id]
-
         await self.send(text_data=json.dumps({
-            # "player_id": self.player_id,
-            "player_position_x":  self.players[player_id]['x'],
-            "player_position_y":  self.players[player_id]['y'],
-            "player_action":  self.players[player_id]['action'],
+            "player_position_x": self.players[player_id]['x'],
+            "player_position_y": self.players[player_id]['y'],
+            "player_action": self.players[player_id]['action'],
 
             "opponent_position_x": self.players[opponent_id]['x'],
             "opponent_position_y": self.players[opponent_id]['y'],
