@@ -120,8 +120,12 @@ class GameClient:
                     opponent.draw(self.screen)
 
                     # Show player stats
-                    self.draw_health_bar(player.health, 20, 20)
-                    self.draw_health_bar(opponent.health, 860, 20)
+                    if not self.player:
+                        self.draw_health_bar(player.health, 20, 20)
+                        self.draw_health_bar(opponent.health, 860, 20)
+                    else:
+                        self.draw_health_bar(opponent.health, 20, 20)
+                        self.draw_health_bar(player.health, 860, 20)
 
                     # player movement check
 
@@ -175,11 +179,11 @@ class GameClient:
                         opponent.action = server_data.get(f"player{opponent_id}_action", int(opponent.action))
                         
                         if not self.player:
-                            player.health = server_data.get(f"player{player_id}_health", int(player.health))
-                            #opponent.health = server_data.get(f"player{opponent_id}_health", int(opponent.health))
+                            player.health = server_data.get(f"player{player_id}_health", int(opponent.health))
+                            # opponent.health = server_data.get(f"player{opponent_id}_health", int(player.health))
                         else:
-                            #opponent.health = server_data.get(f"player{player_id}_health", int(player.health))
-                            opponent.health = server_data.get(f"player{opponent_id}_health", int(opponent.health))
+                            opponent.health = server_data.get(f"player{opponent_id}_health", int(player.health))
+                            player.health = server_data.get(f"player{player_id}_health", int(opponent.health))
 
                         logging.debug("Updated player and opponent positions.")
                     except asyncio.TimeoutError:
