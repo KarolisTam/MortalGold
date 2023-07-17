@@ -32,8 +32,7 @@ class LoginScreen:
         for event in pygame.event.get():
             if event.type == QUIT:
                 return False
-
-            if event.type == KEYDOWN:
+            elif event.type == KEYDOWN:
                 if event.key == K_BACKSPACE:
                     if self.is_username_active():
                         self.username = self.username[:-1]
@@ -56,21 +55,26 @@ class LoginScreen:
                         self.username += event.unicode
                     elif self.is_password_active() and len(self.password) < 30:
                         self.password += event.unicode
-            elif event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:  # 1 represents the left mouse button
+            elif event.type == MOUSEBUTTONDOWN:  # Handle mouse clicks
+                if event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
-                    if self.is_username_active() or self.is_password_active():
-                        if self.login_button_rect.collidepoint(mouse_pos):
-                            if self.username and self.password:
-                                self.get_api_token()
-                                self.match = self.join_create_match()
-                                if self.username == self.match["player1"]:
-                                    self.match["current player"] = 1
-                                else:
-                                    self.match["current player"] = 2
-                                return self.match
-                        elif self.cancel_button_rect.collidepoint(mouse_pos):
-                            pygame.quit()
+                    if self.username_rect.collidepoint(mouse_pos):
+                        self.username_active = True
+                        self.password_active = False
+                    elif self.password_rect.collidepoint(mouse_pos):
+                        self.password_active = True
+                        self.username_active = False
+                    elif self.login_button_rect.collidepoint(mouse_pos):
+                        if self.username and self.password:
+                            self.get_api_token()
+                            self.match = self.join_create_match()
+                            if self.username == self.match["player1"]:
+                                self.match["current player"] = 1
+                            else:
+                                self.match["current player"] = 2
+                            return self.match
+                    elif self.cancel_button_rect.collidepoint(mouse_pos):
+                        pygame.quit()
 
         return None
 
@@ -126,10 +130,13 @@ class LoginScreen:
 
         username_input = self.font.render(truncated_username, True, self.WHITE)
         password_input = self.font.render('*' * len(self.password), True, self.WHITE)
-        username_rect = pygame.Rect(200, 200, 400, 50)
-        password_rect = pygame.Rect(200, 300, 400, 50)
-        pygame.draw.rect(self.screen, self.WHITE, username_rect, 2)
-        pygame.draw.rect(self.screen, self.WHITE, password_rect, 2)
+        self.username_rect = pygame.Rect(200, 200, 400, 50)
+        self.password_rect = pygame.Rect(200, 300, 400, 50)
+        username_color = self.WHITE if self.is_username_active() else self.BLACK
+        password_color = self.WHITE if self.is_password_active() else self.BLACK
+
+        pygame.draw.rect(self.screen, username_color, self.username_rect, 2)
+        pygame.draw.rect(self.screen, password_color, self.password_rect, 2)
         self.screen.blit(title_text, (self.screen_width // 2 - title_text.get_width() // 2, 100))
         self.screen.blit(username_text, (76, 211))
         self.screen.blit(password_text, (82, 312))
