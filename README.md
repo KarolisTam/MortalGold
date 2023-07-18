@@ -1,7 +1,7 @@
 Game README
 Mortal Gold - Multiplayer Fighting Game
 Mortal Gold
-
+Game still under construction.
 Welcome to Mortal Gold, a thrilling multiplayer fighting game where players can battle against each other in intense one-on-one combat using iconic characters such as Putin, Musk, and Trump. Challenge your friends or random opponents and prove your fighting skills in this action-packed game.
 
 How to Play
@@ -11,7 +11,8 @@ Pygame
 Django
 Channels
 Channels-Redis
-djangorestframework
+Django rest framework
+Docker
 Installation
 Clone the repository to your local machine.
 
@@ -50,7 +51,7 @@ The game server is built using Django and Django Channels. It handles the creati
 
 The main server components are:
 
-consumers.py: This file contains the WebSocket consumer class responsible for handling player connections, disconnections, and game events. It also updates player data and sends it to the connected clients.
+consumers.py: This file contains the Django Channels WebSocket consumer class responsible for handling player connections, disconnections, and game events. It also updates player data and sends it to the connected clients.
 
 views.py: This file contains the Django views for creating and listing available matches. It ensures that players cannot join their own created room.
 
