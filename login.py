@@ -105,7 +105,7 @@ class LoginScreen:
         
     def join_create_match(self):
         if self.token is None:
-            self.error_message = 'Failed to get token. Please try again.'
+            self.error_message = 'Password or username incorrect. Please try again.'
             return None
 
         self.header = {
@@ -117,13 +117,23 @@ class LoginScreen:
         try:
             self.conn.request("GET", "/game/match/", payload, self.header)
             response = self.conn.getresponse()
-            match = json.loads(response.read())
-            print(match)
-            return match
+            data = response.read()
+            if response.status != 403:
+                self.error_message = 'You cannot join your own created room.'
+                return None
+
+            match = json.loads(data)
+            if isinstance(match, dict) and "player1" in match:
+                print(match)
+                return match
+            else:
+                self.error_message = 'You cannot join your own created room.'
+                return None
         except Exception as e:
             print(e)
-            self.error_message = 'Failed connetect to server. Please try again.'
+            self.error_message = f'{e}'
             return None
+        
 
     def display(self):
         background = pygame.image.load('assets/images/background/bg.png')
@@ -171,7 +181,7 @@ class LoginScreen:
 
         if self.error_message:
             error = self.font.render(self.error_message, True, self.WHITE)
-            self.screen.blit(error, (250, 500))
+            self.screen.blit(error, ((self.screen_width / 3.7), 500))
 
         pygame.display.flip()
 

@@ -18,6 +18,10 @@ class MatchCreateList(generics.ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+        user_matches = queryset.filter(player1=self.request.user)
+        if user_matches.exists():
+            return Response({"detail": "You cannot join your own created room."}, status=403)
+
         if queryset.exists():
             match = queryset.first()
             match.player2 = self.request.user
@@ -28,7 +32,6 @@ class MatchCreateList(generics.ListCreateAPIView):
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             return Response(serializer.data)
-
 
 
 def index(request):
