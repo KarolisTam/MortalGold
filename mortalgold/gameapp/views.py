@@ -20,8 +20,7 @@ class MatchCreateList(generics.ListCreateAPIView):
         queryset = self.get_queryset()
         user_matches = queryset.filter(player1=self.request.user)
         if user_matches.exists():
-            return Response({"detail": "You cannot join your own created room."}, status=403)
-
+            return Response({"detail": "You cannot join your own created room."}, status=400)
         if queryset.exists():
             match = queryset.first()
             match.player2 = self.request.user

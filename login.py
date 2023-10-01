@@ -48,9 +48,9 @@ class LoginScreen:
                         self.match = self.join_create_match()
                         if self.match:
                             if self.username == self.match["player1"]:
-                                self.match["current player"] = 1
+                                self.match["current player"] = 0
                             else:
-                                self.match["current player"] = 2
+                                self.match["current player"] = 1
                             return self.match
                 else:
                     if self.is_username_active() and len(self.username) < 25:
@@ -73,9 +73,9 @@ class LoginScreen:
                             self.match = self.join_create_match()
                             if self.match:
                                 if self.username == self.match["player1"]:
-                                    self.match["current player"] = 1
+                                    self.match["current player"] = 0
                                 else:
-                                    self.match["current player"] = 2
+                                    self.match["current player"] = 1
                                 return self.match
                     elif self.cancel_button_rect.collidepoint(mouse_pos):
                         pygame.quit()
@@ -105,7 +105,7 @@ class LoginScreen:
         
     def join_create_match(self):
         if self.token is None:
-            self.error_message = 'Password or username incorrect. Please try again.'
+            self.error_message = 'Failed to get token. Please try again.'
             return None
 
         self.header = {
@@ -118,8 +118,8 @@ class LoginScreen:
             self.conn.request("GET", "/game/match/", payload, self.header)
             response = self.conn.getresponse()
             data = response.read()
-            if response.status != 403:
-                self.error_message = 'You cannot join your own created room.'
+            if response.status != 200:
+                self.error_message = 'Failed to join/create match. Please try again.'
                 return None
 
             match = json.loads(data)
@@ -127,11 +127,11 @@ class LoginScreen:
                 print(match)
                 return match
             else:
-                self.error_message = 'You cannot join your own created room.'
+                self.error_message = 'Failed to join/create match. Please try again.'
                 return None
         except Exception as e:
             print(e)
-            self.error_message = f'{e}'
+            self.error_message = 'Failed to join/create match. Please try again.'
             return None
         
 
