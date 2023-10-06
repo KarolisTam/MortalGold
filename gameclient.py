@@ -1,5 +1,3 @@
-
-
 #gameclient.py
 import pygame
 import asyncio
@@ -7,11 +5,10 @@ import websockets
 import json
 import logging
 
-from character import Character
+from character import Character, Opponent
 from background import AnimatedBackground
-from character_selection import CharacterSelectionScreen
+#from character_selection import CharacterSelectionScreen
 from login import LoginScreen
-
 
 class GameClient:
     def __init__(self):
@@ -27,12 +24,12 @@ class GameClient:
         self.clock = pygame.time.Clock()
         self.FPS = 60
 
-        # define colours
+        # Define colours
         self.RED = (255, 0, 0)
         self.YELLOW = (255, 255, 0)
         self.WHITE = (255, 255, 255)
 
-        # define character variables
+        # Define character variables
         self.PUTIN_SIZE = 200
         self.PUTIN_SCALE = 1
         self.PUTIN_OFFSET = [62, 20]
@@ -43,11 +40,6 @@ class GameClient:
         self.MUSK_OFFSET = [62, 20]
         self.MUSK_DATA = [self.MUSK_SIZE, self.MUSK_SCALE, self.MUSK_OFFSET]
 
-        self.TRUMP_SIZE = 200
-        self.TRUMP_SCALE = 1
-        self.TRUMP_OFFSET = [62, 20]
-        self.TRUMP_DATA = [self.TRUMP_SIZE, self.TRUMP_SCALE, self.TRUMP_OFFSET]
-
         # Load background image
         bg_image = pygame.image.load("assets/images/background/bg.png").convert_alpha()
         self.scaled_bg = pygame.transform.scale(bg_image, (self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
@@ -55,15 +47,13 @@ class GameClient:
         # Load spritesheets
         self.putin_sheet = pygame.image.load("assets/images/putin/sprites/putin.png").convert_alpha()
         self.musk_sheet = pygame.image.load("assets/images/musk/sprites/musk.png").convert_alpha()
-        self.trump_sheet = pygame.image.load("assets/images/trump/sprites/trump.png").convert_alpha()
 
-        # define number of steps in each animation
+        # Define number of steps in each animation
         self.PUTIN_ANIMATION_STEPS = [7, 4, 1, 5, 5, 4, 9, 1]
         self.MUSK_ANIMATION_STEPS = [7, 6, 1, 5, 5, 4, 10, 1]
-        self.TRUMP_ANIMATION_STEPS = [10, 5, 1, 5, 1, 1, 1, 1]
 
         # Initialize logging
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s]: %(message)s")
+        #logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s]: %(message)s")
 
     def draw_health_bar(self, health, x, y):
         ratio = health / 100
@@ -72,7 +62,7 @@ class GameClient:
         pygame.draw.rect(self.screen, self.YELLOW, (x, y, 400 * ratio, 30))
 
     async def connect_to_server(self):
-        self.last_sent_data = None  # Add this variable to track the last sent data
+        self.last_sent_data = None
         login = LoginScreen()
         self.match = login.run()
         self.match_id = self.match["id"]
@@ -84,16 +74,15 @@ class GameClient:
         self.player = self.match["current player"]
         self.opponent = int(not self.match["current player"])
 
-
         # Create animated background
         background = AnimatedBackground()
 
         if not self.player:
-            player = Character(self.player, 200, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
-            opponent = Character(self.opponent, 700, 300, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
+            player = Character(200, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+            opponent = Opponent(700, 300, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
         else:
-            opponent = Character(self.player, 200, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
-            player = Character(self.opponent, 700, 300, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)     
+            opponent = Opponent(200, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
+            player = Character(700, 300, True, self.PUTIN_DATA, self.putin_sheet, self.PUTIN_ANIMATION_STEPS)
 
         uri = f"ws://localhost:8001/ws/game/{self.match_id}/"
         try:
@@ -101,13 +90,12 @@ class GameClient:
                 logging.debug("WebSocket connection established.")
                 run = True
                 while run:
-
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             run = False
 
                     self.clock.tick(self.FPS)
-                    logging.debug("Inside the game loop.")
+                    #logging.debug("Inside the game loop.")
 
                     # Draw background
                     self.screen.blit(self.scaled_bg, (0, 0))
@@ -127,10 +115,11 @@ class GameClient:
                         self.draw_health_bar(opponent.health, 20, 20)
                         self.draw_health_bar(player.health, 860, 20)
 
-                    # player movement check
-
+                    # Player movement check
                     player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
-                    # ensure players face each other
+                    opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
+
+                    # Ensure players face each other
                     if player.rect.centerx > opponent.rect.centerx:
                         opponent.flip = False
                     else:
@@ -141,33 +130,32 @@ class GameClient:
                     opponent.update()
                     pygame.display.update()
 
-                    # Send game data to the server only if there are changes
+                    # Send game data to the server
                     game_data = {
                         "player_id": self.match["current player"],
                         "player_position_x": player.rect.x,
                         "player_position_y": player.rect.y,
-                        "player_action": player.action,
                         "player_health": player.health,
+                        "player_action": player.action,  # Player's animation state
 
                         "opponent_health": opponent.health,
+                        "opponent_action": opponent.action,  # Opponent's animation state
                     }
 
                     if game_data != self.last_sent_data:
                         game_data_json = json.dumps(game_data)
 
-                        # After sending game data to the server
                         logging.debug(f"Sending game data to the server: {game_data_json}")
                         await websocket.send(game_data_json)
                         self.last_sent_data = game_data
 
                     # Receive game data from the server
-                    logging.debug("Waiting to receive game data from the server.")
+                    #logging.debug("Waiting to receive game data from the server.")
                     try:
                         player_id = self.match["current player"]
                         opponent_id = int(not self.match["current player"])
-                        # After receiving game data from the server
                         server_data_json = await asyncio.wait_for(websocket.recv(), timeout=0.05)
-                        logging.debug(f"Received game data from the server: {server_data_json}")
+                        #logging.debug(f"Received game data from the server: {server_data_json}")
                         server_data = json.loads(server_data_json)
 
                         player.rect.x = server_data.get(f"player{player_id}_position_x", int(player.rect.x))
@@ -180,14 +168,14 @@ class GameClient:
                         
                         if not self.player:
                             player.health = server_data.get(f"player{player_id}_health", int(opponent.health))
-                            # opponent.health = server_data.get(f"player{opponent_id}_health", int(player.health))
                         else:
                             opponent.health = server_data.get(f"player{opponent_id}_health", int(player.health))
                             player.health = server_data.get(f"player{player_id}_health", int(opponent.health))
 
-                        logging.debug("Updated player and opponent positions.")
+
+                        #logging.debug("Updated player and opponent positions.")
                     except asyncio.TimeoutError:
-                        logging.debug("Timeout while waiting for game data.")
+                        #logging.debug("Timeout while waiting for game data.")
                         continue
                     except websockets.ConnectionClosed:
                         logging.debug("WebSocket connection closed.")
@@ -195,17 +183,12 @@ class GameClient:
                     except Exception as e:
                         logging.debug(f"An error occurred while receiving game data: {e}")
                         break
-                    # pygame.display.update()
         except Exception as e:
             logging.error(f"Error occurred during connection: {e}")
             raise
 
         pygame.quit()
 
-
 if __name__ == "__main__":
     client = GameClient()
     asyncio.get_event_loop().run_until_complete(client.connect_to_server())
-
-
-
