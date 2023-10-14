@@ -8,7 +8,7 @@ class Character():
         self.offset = data[2]
         self.flip = flip
         self.animation_list = self.load_images(sprite_sheet, animation_steps)
-        self.action = 0  # 0:idle, 1:run, 2:jump, 3:punch, 4:kick, 5:gethit
+        self.action = 0  # 0:idle, 1:run, 2:jump, 3:punch, 4:kick, 5:gethit, 6:death, 7:block
         self.frame_index = 0
         self.image = self.animation_list[self.action][self.frame_index]
         self.update_time = pygame.time.get_ticks()
@@ -64,7 +64,6 @@ class Character():
                 self.vel_y = -30
                 self.jump = True
                 #print(f"player id {self.player}: press W ")
-
 
             # Attack
             if key[pygame.K_r] or key[pygame.K_t]:
@@ -206,7 +205,7 @@ class Opponent():
         self.offset = data[2]
         self.flip = flip
         self.animation_list = self.load_images(sprite_sheet, animation_steps)
-        self.action = 0 #0:idle #1:run #2:jump #3:punch #4:kick #5:gethit #6:death #7:dizzy #8:victory #9:
+        self.action = 0 # 0:idle, 1:run, 2:jump, 3:punch, 4:kick, 5:gethit, 6:death, 7:block
         self.frame_index = 0
         self.image = self.animation_list[self.action][self.frame_index] 
         self.update_time = pygame.time.get_ticks()
@@ -221,6 +220,8 @@ class Opponent():
         self.health = 100
         self.alive = True
         self.blocking = False
+        # Create a list to store the frame indices for each action
+        self.frame_indices = [0] * len(animation_steps)
 
     def load_images(self, sprite_sheet, animation_steps):
         # extract images from spritesheet
@@ -231,7 +232,6 @@ class Opponent():
                 temp_img = sprite_sheet.subsurface(x * self.size, y * self.size, self.size, self.size)
                 temp_img_list.append(pygame.transform.scale(temp_img, (self.size * self.image_scale, self.size * self.image_scale)))
             animation_list.append(temp_img_list)
-            print("image loaded")
         return animation_list
 
     def move(self, screen_width, screen_height, surface, target):
@@ -239,20 +239,17 @@ class Opponent():
         dy = 0
         self.running = False
         self.attack_type = 0
-        print("oponentas nejuda")
 
         # can only perform other action if not currently attacking
         if self.attacking == False:
             # movement
             if self.action == 1:
                 self.running = True
-            if self.action == 1:
-                self.running = True
-                print("oponentas juda i sonus")
 
             # jump
             if self.action == 2 and self.jump == False:
                 self.jump = True
+                print("Opponent press W")
 
             # Attack
             if self.action == 3 or self.action == 4:
@@ -260,17 +257,19 @@ class Opponent():
                 # determine wich attact type was used
                 if self.action == 3:
                     self.attack_type = 1
+                    print("Opponent press R")
                 if self.action == 4:
                     self.attack_type = 2
+                    print("Opponent press T")
 
             # Block
             if self.action == 7:
                 self.blocking = True
+                print("Opponent press Q")
             else:
                 self.blocking = False
     
     def update(self):
-        # check what action the player is performing
         if self.health <= 0:
             self.health = 0
             self.alive = False
@@ -298,31 +297,22 @@ class Opponent():
 
     def update_animation(self):
         animation_cooldown = 50
-        # update image
-        self.image = self.animation_list[self.action][self.frame_index]
-        # check if enough time has passed since the last update
-        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
-            self.frame_index += 1
-            self.update_time = pygame.time.get_ticks()
+        
+        if self.alive:
+            if 0 <= self.action < len(self.animation_list):
+                if 0 <= self.frame_indices[self.action] < len(self.animation_list[self.action]):
+                    self.image = self.animation_list[self.action][self.frame_indices[self.action]]
+                    if pygame.time.get_ticks() - self.update_time > animation_cooldown:
+                        self.frame_indices[self.action] += 1
+                        self.update_time = pygame.time.get_ticks()
 
-        # check if the animation has finished
-        if self.frame_index >= len(self.animation_list[self.action]):
-            # if the player is dead then end the animation
-            if self.alive == False:
-                self.frame_index = len(self.animation_list[self.action]) - 1
-            else:
-                self.frame_index = 0
-                # check if attack was executed
-                if self.action == 3 or self.action == 4:
-                    self.attacking = False
-                    self.attack_cooldown = 20
-                # check if damage was taken~
-                if self.action == 5:
-                    self.hit = False
-                    # if the player was in the middle of an attack then attack is stopped
-                    self.attacking = False
-                    self.attack_cooldown = 20
-                    
+                    if self.frame_indices[self.action] >= len(self.animation_list[self.action]):
+                        self.frame_indices[self.action] = 0  # Reset animation frame for the current action
+
+    # Add a new method to reset the frame index for a specific action
+    def reset_frame_index(self, action):
+        self.frame_indices[action] = 0
+                   
     def attack(self, surface, target):
         if self.attack_cooldown == 0:
             self.attacking = True
@@ -339,17 +329,22 @@ class Opponent():
                     target.health -= 10  # Normal damage
                 target.hit = True
         
-            # pygame.draw.rect(surface, (0, 255, 0), attacking_rect)
+            pygame.draw.rect(surface, (0, 255, 0), attacking_rect)
 
     def update_action(self, new_action):
-        # check if the new action is different to the previous one
+        # Check if the new action is different from the previous one
         if new_action != self.action:
             self.action = new_action
-            # update animation settings
+            # Reset the frame index to start the new action from the first frame
             self.frame_index = 0
             self.update_time = pygame.time.get_ticks()
 
+            # If the new action is "getHit," set hit to False to prevent animation from getting stuck
+            if new_action == 5:
+                self.hit = False
+
     def draw(self, surface):
         img = pygame.transform.flip(self.image, self.flip, False)
-        # pygame.draw.rect(surface, (255, 0, 0), self.rect)
+        pygame.draw.rect(surface, (255, 0, 0), self.rect)
         surface.blit(img, (self.rect.x - (self.offset[0] * self.image_scale), self.rect.y - (self.offset[1] * self.image_scale)))
+        

@@ -6,7 +6,7 @@ import json
 import logging
 
 from character import Character, Opponent
-from background import AnimatedBackground
+#from background import AnimatedBackground
 #from character_selection import CharacterSelectionScreen
 from login import LoginScreen
 
@@ -75,7 +75,7 @@ class GameClient:
         self.opponent = int(not self.match["current player"])
 
         # Create animated background
-        background = AnimatedBackground()
+        #background = AnimatedBackground()
 
         if not self.player:
             player = Character(200, 300, True, self.MUSK_DATA, self.musk_sheet, self.MUSK_ANIMATION_STEPS)
@@ -101,7 +101,7 @@ class GameClient:
                     self.screen.blit(self.scaled_bg, (0, 0))
 
                     # Update display
-                    background.update()
+                    #background.update()
 
                     # Draw characters
                     player.draw(self.screen)
@@ -128,7 +128,10 @@ class GameClient:
                     # Update characters
                     player.update()
                     opponent.update()
+                    opponent.update_animation()
+                    player.update_animation()
                     pygame.display.update()
+                    
 
                     # Send game data to the server
                     game_data = {
@@ -154,7 +157,7 @@ class GameClient:
                     try:
                         player_id = self.match["current player"]
                         opponent_id = int(not self.match["current player"])
-                        server_data_json = await asyncio.wait_for(websocket.recv(), timeout=0.05)
+                        server_data_json = await asyncio.wait_for(websocket.recv(), timeout=0.06)
                         #logging.debug(f"Received game data from the server: {server_data_json}")
                         server_data = json.loads(server_data_json)
 
@@ -166,12 +169,12 @@ class GameClient:
                         opponent.rect.y = server_data.get(f"player{opponent_id}_position_y", int(opponent.rect.y))
                         opponent.action = server_data.get(f"player{opponent_id}_action", int(opponent.action))
                         
+                        
                         if not self.player:
                             player.health = server_data.get(f"player{player_id}_health", int(opponent.health))
                         else:
                             opponent.health = server_data.get(f"player{opponent_id}_health", int(player.health))
                             player.health = server_data.get(f"player{player_id}_health", int(opponent.health))
-
 
                         #logging.debug("Updated player and opponent positions.")
                     except asyncio.TimeoutError:
@@ -186,7 +189,6 @@ class GameClient:
         except Exception as e:
             logging.error(f"Error occurred during connection: {e}")
             raise
-
         pygame.quit()
 
 if __name__ == "__main__":
