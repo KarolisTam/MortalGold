@@ -1,11 +1,11 @@
-#gameclient.py
 import pygame
 import asyncio
 import websockets
 import json
 import logging
 
-from character import Character, Opponent
+from character import Character
+from opponent import Opponent
 #from background import AnimatedBackground
 #from character_selection import CharacterSelectionScreen
 from login import LoginScreen
@@ -117,7 +117,7 @@ class GameClient:
 
                     # Player movement check
                     player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
-                    opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
+                    #opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
 
                     # Ensure players face each other
                     if player.rect.centerx > opponent.rect.centerx:
@@ -127,9 +127,9 @@ class GameClient:
 
                     # Update characters
                     player.update()
-                    opponent.update()
+                    #opponent.update()
                     opponent.update_animation()
-                    player.update_animation()
+                    #player.update_animation()
                     pygame.display.update()
                     
 
@@ -161,9 +161,9 @@ class GameClient:
                         #logging.debug(f"Received game data from the server: {server_data_json}")
                         server_data = json.loads(server_data_json)
 
-                        player.rect.x = server_data.get(f"player{player_id}_position_x", int(player.rect.x))
-                        player.rect.y = server_data.get(f"player{player_id}_position_y", int(player.rect.y))
-                        player.action = server_data.get(f"player{player_id}_action", int(player.action))
+                        #player.rect.x = server_data.get(f"player{player_id}_position_x", int(player.rect.x))
+                        #player.rect.y = server_data.get(f"player{player_id}_position_y", int(player.rect.y))
+                        #player.action = server_data.get(f"player{player_id}_action", int(player.action))
                         
                         opponent.rect.x = server_data.get(f"player{opponent_id}_position_x", int(opponent.rect.x))
                         opponent.rect.y = server_data.get(f"player{opponent_id}_position_y", int(opponent.rect.y))
