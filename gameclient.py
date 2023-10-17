@@ -1,13 +1,12 @@
-#gameclient.py
 import pygame
 import asyncio
 import websockets
 import json
 import logging
 
-from character import Character, Opponent
+from character import Character
+from opponent import Opponent
 from background import AnimatedBackground
-#from character_selection import CharacterSelectionScreen
 from login import LoginScreen
 
 class GameClient:
@@ -52,9 +51,6 @@ class GameClient:
         self.PUTIN_ANIMATION_STEPS = [7, 4, 1, 5, 5, 4, 9, 1]
         self.MUSK_ANIMATION_STEPS = [7, 6, 1, 5, 5, 4, 10, 1]
 
-        # Initialize logging
-        #logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s]: %(message)s")
-
     def draw_health_bar(self, health, x, y):
         ratio = health / 100
         pygame.draw.rect(self.screen, self.WHITE, (x - 2, y - 2, 404, 34))
@@ -74,7 +70,6 @@ class GameClient:
         self.player = self.match["current player"]
         self.opponent = int(not self.match["current player"])
 
-        # Create animated background
         background = AnimatedBackground()
 
         if not self.player:
@@ -95,19 +90,15 @@ class GameClient:
                             run = False
 
                     self.clock.tick(self.FPS)
-                    #logging.debug("Inside the game loop.")
 
-                    # Draw background
                     self.screen.blit(self.scaled_bg, (0, 0))
 
-                    # Update display
                     background.update()
+                    background.draw(self.screen)
 
-                    # Draw characters
                     player.draw(self.screen)
                     opponent.draw(self.screen)
 
-                    # Show player stats
                     if not self.player:
                         self.draw_health_bar(player.health, 20, 20)
                         self.draw_health_bar(opponent.health, 860, 20)
@@ -115,67 +106,50 @@ class GameClient:
                         self.draw_health_bar(opponent.health, 20, 20)
                         self.draw_health_bar(player.health, 860, 20)
 
-                    # Player movement check
                     player.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, opponent)
-                    opponent.move(self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.screen, player)
 
-                    # Ensure players face each other
                     if player.rect.centerx > opponent.rect.centerx:
                         opponent.flip = False
                     else:
                         opponent.flip = True
 
-                    # Update characters
                     player.update()
-                    opponent.update()
+                    opponent.update_animation()
                     pygame.display.update()
 
-                    # Send game data to the server
                     game_data = {
                         "player_id": self.match["current player"],
                         "player_position_x": player.rect.x,
                         "player_position_y": player.rect.y,
                         "player_health": player.health,
-                        "player_action": player.action,  # Player's animation state
+                        "player_action": player.action,
 
                         "opponent_health": opponent.health,
-                        "opponent_action": opponent.action,  # Opponent's animation state
+                        "opponent_action": opponent.action,
                     }
 
                     if game_data != self.last_sent_data:
                         game_data_json = json.dumps(game_data)
-
                         logging.debug(f"Sending game data to the server: {game_data_json}")
                         await websocket.send(game_data_json)
                         self.last_sent_data = game_data
 
-                    # Receive game data from the server
-                    #logging.debug("Waiting to receive game data from the server.")
                     try:
                         player_id = self.match["current player"]
                         opponent_id = int(not self.match["current player"])
-                        server_data_json = await asyncio.wait_for(websocket.recv(), timeout=0.05)
-                        #logging.debug(f"Received game data from the server: {server_data_json}")
+                        server_data_json = await asyncio.wait_for(websocket.recv(), timeout=0.06)
                         server_data = json.loads(server_data_json)
 
-                        player.rect.x = server_data.get(f"player{player_id}_position_x", int(player.rect.x))
-                        player.rect.y = server_data.get(f"player{player_id}_position_y", int(player.rect.y))
-                        player.action = server_data.get(f"player{player_id}_action", int(player.action))
-                        
                         opponent.rect.x = server_data.get(f"player{opponent_id}_position_x", int(opponent.rect.x))
                         opponent.rect.y = server_data.get(f"player{opponent_id}_position_y", int(opponent.rect.y))
                         opponent.action = server_data.get(f"player{opponent_id}_action", int(opponent.action))
-                        
+
                         if not self.player:
                             player.health = server_data.get(f"player{player_id}_health", int(opponent.health))
                         else:
                             opponent.health = server_data.get(f"player{opponent_id}_health", int(player.health))
                             player.health = server_data.get(f"player{player_id}_health", int(opponent.health))
-
-
-                        #logging.debug("Updated player and opponent positions.")
                     except asyncio.TimeoutError:
-                        #logging.debug("Timeout while waiting for game data.")
                         continue
                     except websockets.ConnectionClosed:
                         logging.debug("WebSocket connection closed.")
@@ -186,7 +160,6 @@ class GameClient:
         except Exception as e:
             logging.error(f"Error occurred during connection: {e}")
             raise
-
         pygame.quit()
 
 if __name__ == "__main__":
